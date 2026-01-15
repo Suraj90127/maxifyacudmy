@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Test Course Content Upload</title>
+  </head>
+
+  <body>
+    <h1>Create Course Content</h1>
+
+    <form action="/api/course-content/create" method="POST" enctype="multipart/form-data">
+      <label>Course ID:</label>
+      <input type="text" name="course_id" required /><br><br>
+
+      <label>Title:</label>
+      <input type="text" name="title" required /><br><br>
+
+      <label>Upload Videos:</label>
+      <input type="file" name="videos" multiple /><br><br>
+
+      <label>Upload Images:</label>
+      <input type="file" name="video_images" multiple /><br><br>
+
+      <label>Upload PDFs:</label>
+      <input type="file" name="video_pdfs" multiple /><br><br>
+
+      <button type="submit">Create Course Content</button>
+    </form>
+
+
+    <hr>
+    <h1>Update Course Content</h1>
+
+    <form action="/api/course-content/update" method="POST" enctype="multipart/form-data" id="updateForm">
+      <label>Content ID:</label>
+      <input type="text" id="contentId" placeholder="Enter Content ID" required /><br><br>
+
+      <label>New Title:</label>
+      <input type="text" name="title" /><br><br>
+
+      <label>Remove Images:</label>
+      <input type="text" name="remove_images" placeholder="Comma separated URLs" /><br><br>
+
+      <label>Remove Videos:</label>
+      <input type="text" name="remove_videos" placeholder="Comma separated URLs" /><br><br>
+
+      <label>Remove PDFs:</label>
+      <input type="text" name="remove_pdfs" placeholder="Comma separated URLs" /><br><br>
+
+      <label>Add New Videos:</label>
+      <input type="file" name="videos" multiple /><br><br>
+
+      <label>Add New Images:</label>
+      <input type="file" name="video_images" multiple /><br><br>
+
+      <label>Add New PDFs:</label>
+      <input type="file" name="video_pdfs" multiple /><br><br>
+
+      <button type="submit">Update Course Content</button>
+    </form>
+
+    <script>
+      // Dynamically change form action to match ID
+      document.getElementById("updateForm").addEventListener("submit", function (e) {
+        const id = document.getElementById("contentId").value;
+        e.target.action = `/api/course-content/update/${id}`;
+      });
+    </script>
+  </body>
+</html>
