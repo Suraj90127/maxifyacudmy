@@ -214,7 +214,8 @@ exports.enrollCourse = async (req, res) => {
 
     // Check User
     const user = await User.findById(user_id);
-    if (!user) return res.status(404).json({ message: "User does not exist" });
+    if (!user)
+      return res.status(404).json({ message: "User does not exist" });
 
     // Check Course
     const course = await Course.findById(course_id);
@@ -224,33 +225,37 @@ exports.enrollCourse = async (req, res) => {
     // Find purchase
     let purchase = await CoursePurchase.findOne({ course_id, user_id });
 
-    // If FREE COURSE — create auto purchase
-    if (!purchase && course.price == 0) {
+    /* ================= FREE COURSE ================= */
+    if (!purchase && Number(course.price) === 0) {
       purchase = await CoursePurchase.create({
         course_id,
         user_id,
-        is_buy: true,
-        enrolled: false,
+        is_buy: false,          // 🔥 IMPORTANT
+        enrolled: true,         // 🔥 Direct enroll
         purchased_amount: 0,
         coupon_amount: 0,
+        // ❌ payment_id NOT PRESENT
+      });
+
+      return res.status(200).json({
+        message: "You have successfully enrolled in this free course",
+        purchase,
       });
     }
 
-    // If no purchase → cannot enroll
+    /* ================= PAID COURSE ================= */
     if (!purchase) {
       return res.status(400).json({
         message: "You must purchase this course before enrolling",
       });
     }
 
-    // Already enrolled?
     if (purchase.enrolled === true) {
       return res.status(400).json({
         message: "You are already enrolled in this course",
       });
     }
 
-    // Enroll now
     purchase.enrolled = true;
     await purchase.save();
 

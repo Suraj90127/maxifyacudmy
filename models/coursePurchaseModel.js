@@ -18,7 +18,7 @@ const coursePurchaseSchema = new mongoose.Schema(
 
     is_buy: {
       type: Boolean,
-      default: true,
+      default: false, // 🔥 safer default
     },
 
     enrolled: {
@@ -36,9 +36,6 @@ const coursePurchaseSchema = new mongoose.Schema(
       default: 0,
     },
 
-    /* ===============================
-       💳 PAYMENT DETAILS
-    =============================== */
     payment_gateway: {
       type: String,
       enum: ["razorpay"],
@@ -46,28 +43,27 @@ const coursePurchaseSchema = new mongoose.Schema(
     },
 
     payment_id: {
-      type: String, // razorpay_payment_id
+      type: String,
       unique: true,
+      sparse: true, // ⭐
     },
 
     order_id: {
-      type: String, // razorpay_order_id
+      type: String,
       unique: true,
+      sparse: true, // ⭐
     },
 
     payment_status: {
       type: String,
-      enum: ["pending", "paid", "failed", "refunded"],
-      default: "paid",
+      enum: ["pending", "paid", "failed", "refunded", "free"],
+      default: "free",
     },
   },
   { timestamps: true }
 );
 
-/* ===============================
-   🔒 PREVENT DUPLICATE PURCHASE
-   (same user same course)
-=============================== */
+/* 🔒 One user – one course */
 coursePurchaseSchema.index(
   { user_id: 1, course_id: 1 },
   { unique: true }

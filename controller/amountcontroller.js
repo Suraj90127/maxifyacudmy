@@ -192,7 +192,7 @@ exports.verifyPayment = async (req, res) => {
 
 exports.createPurchase = async (req, res) => {
   try {
-    let {
+    const {
       course_id,
       is_buy = true,
       purchased_amount = 0,
@@ -204,44 +204,34 @@ exports.createPurchase = async (req, res) => {
 
     let user_id;
 
-    /* =====================
-       USER IDENTIFICATION
-    ===================== */
+    /* ===== USER IDENTIFY ===== */
     if (req.user?.id) {
       user_id = req.user.id;
     } else if (email) {
-      const user = await User.findOne({ email: normalizeEmail(email) });
+      const user = await User.findOne({ email: email.toLowerCase() });
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
       user_id = user._id;
     } else {
-      return res.status(400).json({
-        message: "User authentication or email is required",
-      });
+      return res.status(400).json({ message: "User info missing" });
     }
 
-    /* =====================
-       VALIDATIONS
-    ===================== */
+    /* ===== VALIDATIONS ===== */
     if (!course_id) {
-      return res.status(400).json({ message: "Course ID is required" });
+      return res.status(400).json({ message: "Course ID required" });
+    }
+
+    if (!razorpay_payment_id || !razorpay_order_id) {
+      return res.status(400).json({ message: "Payment not verified" });
     }
 
     const course = await Course.findById(course_id);
     if (!course) {
-      return res.status(404).json({ message: "Course does not exist" });
+      return res.status(404).json({ message: "Course not found" });
     }
 
-    if (!razorpay_payment_id || !razorpay_order_id) {
-      return res.status(400).json({
-        message: "Payment not verified",
-      });
-    }
-
-    /* =====================
-       DUPLICATE CHECK
-    ===================== */
+    /* ===== DUPLICATE CHECK ===== */
     const alreadyPurchased = await CoursePurchase.findOne({
       user_id,
       course_id,
@@ -249,91 +239,26 @@ exports.createPurchase = async (req, res) => {
 
     if (alreadyPurchased) {
       return res.status(400).json({
-        message: "You have already purchased this course",
+        message: "Course already purchased",
       });
     }
 
-    /* =====================
-       CREATE PURCHASE
-    ===================== */
-    exports.createPurchase = async (req, res) => {
-      try {
-        const {
-          course_id,
-          is_buy = true,
-          purchased_amount = 0,
-          coupon_amount = 0,
-          email,
-          razorpay_payment_id,
-          razorpay_order_id,
-        } = req.body;
+    /* ===== CREATE PURCHASE ===== */
+    const purchase = await CoursePurchase.create({
+      user_id,
+      course_id,
+      email,
+      is_buy,
+      enrolled: true,
+      purchased_amount: Number(purchased_amount),
+      coupon_amount: Number(coupon_amount),
+      payment_gateway: "razorpay",
+      payment_id: razorpay_payment_id,
+      order_id: razorpay_order_id,
+      payment_status: "paid",
+    });
 
-        const user_id = req.user.id;
-
-        if (!course_id) {
-          return res.status(400).json({ message: "Course ID is required." });
-        }
-
-        if (!email) {
-          return res.status(400).json({ message: "Email is required." });
-        }
-
-        // ✅ Check user
-        const user = await User.findById(user_id);
-        if (!user) {
-          return res.status(404).json({ message: "User does not exist." });
-        }
-
-        // ✅ Check course
-        const course = await Course.findById(course_id);
-        if (!course) {
-          return res.status(404).json({ message: "Course does not exist." });
-        }
-
-        // ✅ Duplicate purchase check
-        const alreadyPurchased = await CoursePurchase.findOne({
-          course_id,
-          user_id,
-        });
-
-        if (alreadyPurchased) {
-          return res
-            .status(400)
-            .json({ message: "You have already purchased this course." });
-        }
-
-        // ✅ Create purchase
-        const purchase = await CoursePurchase.create({
-          user_id,
-          course_id,
-          email, // ✅ SAVE EMAIL
-          is_buy,
-          enrolled: true,
-
-          purchased_amount: Number(purchased_amount),
-          coupon_amount: Number(coupon_amount),
-
-          payment_gateway: "razorpay",
-          payment_id: razorpay_payment_id,
-          order_id: razorpay_order_id,
-          payment_status: "paid",
-        });
-
-        return res.status(200).json({
-          message: "Course purchased successfully.",
-          purchase,
-        });
-
-      } catch (error) {
-        return res.status(500).json({
-          message: "Failed to create purchase.",
-          error: error.message,
-        });
-      }
-    };
-
-
-
+    /* ===== SEND LOGIN CREDENTIALS (GUEST) ===== */
     const user = await User.findById(user_id);
 
     if (user?.temporary_password) {
@@ -341,7 +266,6 @@ exports.createPurchase = async (req, res) => {
         user.email,
         user.temporary_password
       );
-
       user.temporary_password = null;
       await user.save();
     }
