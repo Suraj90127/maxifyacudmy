@@ -1,5 +1,12 @@
 import FeatureCard from "./FeatureCard";
 
+import shape1 from "../../../assets/shape-1 edu.svg";
+import shape2 from "../../../assets/ding.svg";
+
+// ✅ ICONS IMPORT (IMPORTANT)
+import Educator from "../../../assets/man.svg";
+import TopInstructor from "../../../assets/Top Instructor.svg";
+import Award from "../../../assets/award.svg";
 
 export default function FeaturesSection() {
   const featureData = [
@@ -7,40 +14,37 @@ export default function FeaturesSection() {
       id: 1,
       title: "Educator Support",
       desc: "Get complete guidance from experienced mentors who help you learn every concept with real-world examples.",
-      icon: "https://course.super-club.xyz/core/resources/views/templates/basic/images/1_1.svg",
+      icon: Educator,
       delay: 0.2,
     },
     {
       id: 2,
       title: "Top Instructor",
       desc: "Learn from certified industry professionals with hands-on expertise in digital marketing and design.",
-      icon: "https://course.super-club.xyz/core/resources/views/templates/basic/images/2_1.svg",
+      icon: TopInstructor,
       delay: 0.4,
     },
     {
       id: 3,
       title: "Award Winning",
       desc: "Trusted by learners and recognized for delivering quality education and measurable career growth.",
-      icon: "https://course.super-club.xyz/core/resources/views/templates/basic/images/3_2.svg",
+      icon: Award,
       delay: 0.6,
     },
   ];
 
   return (
-    <section
-      className="relative py-20"
-      style={{ background: "#003867" }}
-    >
+    <section className="relative py-20 bg-[#003867] overflow-hidden">
       {/* LEFT DOTTED SHAPE */}
       <img
-        src="https://course.super-club.xyz/core/resources/views/templates/basic/images/shape-1_3.svg"
+        src={shape1}
         className="absolute top-16 left-10 w-16 opacity-40"
         alt="shape"
       />
 
       {/* RIGHT FLOAT SHAPE */}
       <img
-        src="https://course.super-club.xyz/core/resources/views/templates/basic/images/shape-2.svg"
+        src={shape2}
         className="absolute bottom-12 right-10 w-20 opacity-40"
         alt="shape"
       />

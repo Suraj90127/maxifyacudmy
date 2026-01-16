@@ -1,5 +1,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import light from '../../../assets/light.svg'
+import butterfly from '../../../assets/butterfly.svg'
 
 export default function FunFact() {
 
@@ -55,12 +57,12 @@ export default function FunFact() {
 
         {/* Shapes */}
         <motion.img
-          src="https://course.super-club.xyz/core/resources/views/templates/basic/images/shape-1_6.svg"
+          src={light}
           alt="shape"
           className="absolute top-43 left-175 w-10 animate-bounce"
         />
         <motion.img
-          src="https://course.super-club.xyz/core/resources/views/templates/basic/images/shape-2_3.svg"
+          src={butterfly}
           alt="shape"
           className="absolute bottom-10 right-145 w-25 animate-spin-slow"
         />

@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 
 import { FaCheck } from "react-icons/fa";
 import { TbSchool } from "react-icons/tb";
+import shape2 from '../../../assets/shape-2.svg'
+
 
 export default function HomeAbout() {
   const [count, setCount] = useState(0);
@@ -42,7 +44,7 @@ export default function HomeAbout() {
 
       {/* RIGHT YELLOW SHAPE */}
       <motion.img
-        src="https://course.super-club.xyz/core/resources/views/templates/basic/images/abstract-element-regular.svg"
+        src={shape2}
         alt="shape-2"
         className="absolute right-60 bottom-20 w-40"
         animate={{ y: [0, -20, 0] }}

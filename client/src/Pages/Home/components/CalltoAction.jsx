@@ -1,6 +1,9 @@
 import React from "react";
 import { FiArrowRight } from "react-icons/fi";
 import { motion } from "framer-motion";
+import curl from '../../../assets/curl.svg'
+import shape from '../../../assets/ding.svg'
+import shpae2 from '../../../assets/90.svg'
 
 export default function CallToActionSection() {
   return (
@@ -20,17 +23,17 @@ export default function CallToActionSection() {
         >
           {/* ---------------- SHAPES ---------------- */}
           <img
-            src="https://eduna-html.vercel.app/assets/images/call-action/call-action-1/shape-1.svg"
+            src={curl}
             className="hidden lg:block absolute top-10 z-1 left-10 w-34"
             alt="shape"
           />
           <img
-            src="https://course.super-club.xyz/core/resources/views/templates/basic/images/shape-2_5.svg"
+            src={shape}
             className="hidden lg:block absolute left-100 z-1 top-15 w-16"
             alt="shape"
           />
           <img
-            src="https://course.super-club.xyz/core/resources/views/templates/basic/images/shape-3_5.svg"
+            src={shpae2}
             className="hidden lg:block absolute -bottom-2 right-0 w-30"
             alt="shape"
           />

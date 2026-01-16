@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
 import { FiArrowRight } from "react-icons/fi";
 import CourseCard from "../../../Components/CourseCard";
-
+import shape1 from "../../../assets/shape-1.svg";
+import shape3 from '../../../assets/shape-3.svg'
 export default function HeroSection() {
     return (<>
 
@@ -24,7 +25,7 @@ export default function HeroSection() {
                     >
                         {/* Stars */}
                         <motion.img
-                            src="https://course.super-club.xyz/core/resources/views/templates/basic/images/shape-1_2.svg"
+                            src={shape1}
                             alt="stars"
                             className="w-10 mb-3 mx-auto lg:mx-0"
                             animate={{ y: [0, -5, 0] }}
@@ -103,11 +104,11 @@ export default function HeroSection() {
 
                         {/* Dots Animation */}
                         <motion.div
-  className="absolute -right-64 top-64 grid grid-cols-3 gap-2 opacity-60 z-20"
+  className="absolute -right-40 top-64 grid grid-cols-3 gap-2 opacity-60 z-20"
   animate={{ opacity: [0.6, 1, 0.6] }}
   transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
 >
-  <img src="https://course.super-club.xyz/core/resources/views/templates/basic/images/shape-3_1.svg" alt="loading.." />
+  <img src={shape3} alt="loading.." />
 </motion.div>
 
                     </motion.div>
