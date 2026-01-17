@@ -45,8 +45,8 @@ import Support from "./Pages/profile/Support";
 import ChangePassword from "./Pages/profile/ChangePassword";
 
 /* ================== COMPONENTS ================== */
-import ProtectedRoute from "./components/ProtectedRoute";
-import UserLayout from "./components/UserLayout";
+import ProtectedRoute from "./Components/ProtectedRoute";
+import UserLayout from "./Components/UserLayout";
 
 /* ================== GLOBAL STYLES ================== */
 import "./index.css";
