@@ -100,7 +100,7 @@ const testimonials = Array.isArray(reviewData)
 
                       <div className="flex items-center justify-center lg:justify-start gap-4 border-t border-gray-100 pt-5">
                         <img
-                          src="https://course.super-club.xyz/core/resources/views/templates/basic/images/author-1.png"
+                          src="https://i.ibb.co/HfSZgpRc/avatr.avif"
                           className="w-12 h-12 rounded-full border-2 border-white shadow-sm"
                           alt={review.reviewer_name}
                         />

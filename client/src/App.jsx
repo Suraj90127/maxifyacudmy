@@ -1,4 +1,3 @@
-// src/App.js
 import React, { useEffect } from "react";
 import {
   BrowserRouter,
@@ -9,41 +8,41 @@ import {
 } from "react-router-dom";
 
 /* ================== PUBLIC PAGES ================== */
-import Home from "./pages/Home/Home";
-import Courses from "./pages/Courses/Courses";
-import CourseInfo from "./pages/Courses/CourseInfo";
-import CoursesContent from "./pages/Courses/CoursesContent";
+import Home from "./Pages/Home/Home";
+import Courses from "./Pages/Courses/Courses";
+import CourseInfo from "./Pages/Courses/CourseInfo";
+import CoursesContent from "./Pages/Courses/CoursesContent";
 
-import Login from "./pages/Auth/Login";
-import Register from "./pages/Auth/Register";
-import ForgetPassword from "./pages/Auth/ForgotPassword";
-import VerifyAndReset from "./pages/Auth/VerifyAndReset";
-import Contact from "./pages/Auth/Contact";
+import Login from "./Pages/Auth/Login";
+import Register from "./Pages/Auth/Register";
+import ForgetPassword from "./Pages/Auth/ForgotPassword";
+import VerifyAndReset from "./Pages/Auth/VerifyAndReset";
+import Contact from "./Pages/Auth/Contact";
 
-import Blogs from "./pages/Blog/Blogs";
-import BlogDetail from "./pages/Blog/BlogDetail";
-import DigitalProducts from "./pages/Blog/DigitalProducts";
-import PdfReader from "./pages/Blog/PdfReader";
-import ProductPDF from "./pages/Blog/ProductPDF";
+import Blogs from "./Pages/Blog/Blogs";
+import BlogDetail from "./Pages/Blog/BlogDetail";
+import DigitalProducts from "./Pages/Blog/DigitalProducts";
+import PdfReader from "./Pages/Blog/PdfReader";
+import ProductPDF from "./Pages/Blog/ProductPDF";
 
-import CategoryCourses from "./pages/Home/CategoryCourses";
+import CategoryCourses from "./Pages/Home/CategoryCourses";
 
 /* ================== STATIC PAGES ================== */
-import About from "./pages/About";
-import FAQ from "./pages/FAQ";
-import ShippingPolicy from "./pages/ShippingPolicy";
-import RefundPolicy from "./pages/RefundPolicy";
-import TermsConditions from "./pages/TermsConditions";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
+import About from "./Pages/About";
+import FAQ from "./Pages/FAQ";
+import ShippingPolicy from "./Pages/ShippingPolicy";
+import RefundPolicy from "./Pages/RefundPolicy";
+import TermsConditions from "./Pages/TermsConditions";
+import PrivacyPolicy from "./Pages/PrivacyPolicy";
 
 /* ================== USER PANEL ================== */
-import Dashboard from "./pages/profile/Dashboard";
-import Profile from "./pages/profile/Profile";
-import MyCourse from "./pages/profile/MyCourse";
-import PaymentHistory from "./pages/profile/PaymentHistory";
-import { MyReferral } from "./pages/profile/MyReferral";
-import Support from "./pages/profile/Support";
-import ChangePassword from "./pages/profile/ChangePassword";
+import Dashboard from "./Pages/profile/Dashboard";
+import Profile from "./Pages/profile/Profile";
+import MyCourse from "./Pages/profile/MyCourse";
+import PaymentHistory from "./Pages/profile/PaymentHistory";
+import { MyReferral } from "./Pages/profile/MyReferral";
+import Support from "./Pages/profile/Support";
+import ChangePassword from "./Pages/profile/ChangePassword";
 
 /* ================== COMPONENTS ================== */
 import ProtectedRoute from "./components/ProtectedRoute";
