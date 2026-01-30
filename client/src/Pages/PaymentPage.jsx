@@ -320,7 +320,7 @@ const PaymentPage = () => {
                 </h2>
                 
                 {/* Features Grid - Compact on Mobile */}
-                <div className="grid grid-cols-2 gap-2 mb-4">
+                <div className=" hidden sm:grid grid-cols-2 gap-2 mb-4">
                   <div className="flex items-center p-2 bg-gray-50 rounded-lg">
                     <div className="w-7 h-7 bg-primary/10 rounded flex items-center justify-center mr-2 flex-shrink-0">
                       <FaLock className="text-primary text-xs" />
