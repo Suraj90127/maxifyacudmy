@@ -290,7 +290,7 @@ const PaymentPage = () => {
             Back to Course
           </button>
           <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">Complete Your Enrollment</h1>
-          <p className="text-gray-600 mt-1 sm:mt-2 text-sm sm:text-base">Secure checkout for {course.title}</p>
+          {/* <p className="text-gray-600 mt-1 sm:mt-2 text-sm sm:text-base">Secure checkout for {course.title}</p> */}
         </div>
 
         <div className="flex flex-col lg:flex-row gap-6">
@@ -305,13 +305,14 @@ const PaymentPage = () => {
                   alt={course.title}
                   className="w-full h-40 object-cover"
                 />
-                {/* Price Badge on Image for Mobile */}
+                {/* 
                 <div className="absolute top-3 right-3 bg-black/80 text-white px-3 py-1.5 rounded-lg">
                   <span className="font-bold text-lg">₹{finalPrice}</span>
                   {course?.discount_price > 0 && (
                     <span className="text-xs line-through ml-1 text-gray-300">₹{course.price}</span>
                   )}
                 </div>
+                */}
               </div>
               
               <div className="p-4">
@@ -320,7 +321,7 @@ const PaymentPage = () => {
                 </h2>
                 
                 {/* Features Grid - Compact on Mobile */}
-                <div className=" hidden sm:grid grid-cols-2 gap-2 mb-4">
+                <div className="grid grid-cols-2 gap-2 mb-4">
                   <div className="flex items-center p-2 bg-gray-50 rounded-lg">
                     <div className="w-7 h-7 bg-primary/10 rounded flex items-center justify-center mr-2 flex-shrink-0">
                       <FaLock className="text-primary text-xs" />
