@@ -303,7 +303,7 @@ const PaymentPage = () => {
                 <img
                   src={course.image}
                   alt={course.title}
-                  className="w-full h-40 object-cover"
+                  className="w-full h-full object-cover"
                 />
                 {/* 
                 <div className="absolute top-3 right-3 bg-black/80 text-white px-3 py-1.5 rounded-lg">
@@ -366,7 +366,7 @@ const PaymentPage = () => {
               <img
                 src={course.image}
                 alt={course.title}
-                className="w-full h-48 sm:h-56 md:h-64 object-cover"
+                className="w-full h-full sm:h-full md:h-full object-cover"
               />
               <div className="p-4 sm:p-6 md:p-8">
                 <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">
@@ -465,19 +465,18 @@ const PaymentPage = () => {
                         value={formData.email}
                         onChange={handleChange}
                         required
-                        className="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2.5 pl-9 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                        className="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2.5  text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                         placeholder="you@example.com"
                       />
-                      <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm" />
                     </div>
                   </div>
 
                   {/* Phone Input */}
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                      <FaPhone className="inline mr-1 text-gray-400" />
-                      Phone Number
-                    </label>
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                        <FaPhone className="inline mr-1 sm:mr-2 text-gray-400" />
+                        Phone Number
+                      </label>
                     <div className="relative">
                       <input
                         type="tel"
@@ -485,10 +484,9 @@ const PaymentPage = () => {
                         value={formData.phone}
                         onChange={handleChange}
                         required
-                        className="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2.5 pl-9 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                        className="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2.5  text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                         placeholder="10-digit mobile number"
                       />
-                      <FaPhone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm" />
                     </div>
                   </div>
 
@@ -656,10 +654,9 @@ const PaymentPage = () => {
                           value={formData.email}
                           onChange={handleChange}
                           required
-                          className="w-full bg-gray-50 border border-gray-300 rounded-lg sm:rounded-xl px-4 py-3 sm:py-3.5 pl-10 sm:pl-11 text-sm sm:text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                          className="w-full bg-gray-50 border border-gray-300 rounded-lg sm:rounded-xl px-4 py-3 sm:py-3.5  text-sm sm:text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                           placeholder="you@example.com"
                         />
-                        <FaEnvelope className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm sm:text-base" />
                       </div>
                     </div>
 
@@ -676,10 +673,9 @@ const PaymentPage = () => {
                           value={formData.phone}
                           onChange={handleChange}
                           required
-                          className="w-full bg-gray-50 border border-gray-300 rounded-lg sm:rounded-xl px-4 py-3 sm:py-3.5 pl-10 sm:pl-11 text-sm sm:text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                          className="w-full bg-gray-50 border border-gray-300 rounded-lg sm:rounded-xl px-4 py-3 sm:py-3.5  text-sm sm:text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                           placeholder="10-digit mobile number"
                         />
-                        <FaPhone className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm sm:text-base" />
                       </div>
                     </div>
 
