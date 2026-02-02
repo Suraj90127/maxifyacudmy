@@ -35,7 +35,11 @@ exports.createOrder = async (req, res) => {
   try {
     let { amount, email, phone } = req.body;
 
-    if (!amount || Number(amount) <= 0) {
+    /* =====================
+       AMOUNT VALIDATION
+    ===================== */
+    amount = Number(amount);
+    if (!amount || isNaN(amount) || amount <= 0) {
       return res.status(400).json({
         success: false,
         message: "Valid amount is required",
@@ -43,7 +47,6 @@ exports.createOrder = async (req, res) => {
     }
 
     let user = null;
-
 
     /* =====================
        LOGGED-IN USER
@@ -77,7 +80,8 @@ exports.createOrder = async (req, res) => {
         const plainPassword = generateRandomPassword(8);
         const hashedPassword = await bcrypt.hash(plainPassword, 10);
         const referralCode = await generateNumericReferralCode();
-        const FRONTEND = process.env.FRONTEND_URL || "http://localhost:5173";
+        const FRONTEND =
+          process.env.FRONTEND_URL || "http://localhost:5173";
 
         user = await User.create({
           firstname: email.split("@")[0],
@@ -85,11 +89,9 @@ exports.createOrder = async (req, res) => {
           email,
           mobile: phone,
           password: hashedPassword,
-
-          temporary_password: plainPassword, // 🔥 IMPORTANT
+          temporary_password: plainPassword,
           referral_code: referralCode,
           referral_link: `${FRONTEND}/register?ref=${referralCode}`,
-
           role: "user",
           i_agree: true,
           is_verified: true,
@@ -98,13 +100,8 @@ exports.createOrder = async (req, res) => {
     }
 
     /* =====================
-       TOKEN SET
+       JWT COOKIE SET
     ===================== */
-    res.clearCookie("token", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-    });
     const token = createToken({
       id: user._id,
       role: user.role,
@@ -112,7 +109,7 @@ exports.createOrder = async (req, res) => {
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: process.env.NODE_ENV === "production", // HTTPS required in live
       sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
@@ -121,9 +118,13 @@ exports.createOrder = async (req, res) => {
        RAZORPAY ORDER
     ===================== */
     const order = await razorpay.orders.create({
-      amount: Math.round(Number(amount) * 100),
+      amount: Math.round(amount * 100), // INR → paisa
       currency: "INR",
-      receipt: `receipt_${Date.now()}`,
+      receipt: `rcpt_${Date.now()}`,
+      notes: {
+        userId: user._id.toString(),
+        email: user.email,
+      },
     });
 
     return res.status(200).json({
@@ -135,12 +136,15 @@ exports.createOrder = async (req, res) => {
       user_id: user._id,
       email: user.email,
     });
-
   } catch (error) {
-    console.error("❌ Create Order Error:", error);
+    console.error("❌ CREATE ORDER ERROR:", error?.error || error);
+
     return res.status(500).json({
       success: false,
-      message: "Order creation failed",
+      message:
+        error?.error?.description ||
+        error?.message ||
+        "Order creation failed",
     });
   }
 };
