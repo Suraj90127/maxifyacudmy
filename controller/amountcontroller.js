@@ -130,14 +130,14 @@ exports.verifyPayment = async (req, res) => {
       });
     }
 
-    const body = razorpay_order_id + "|" + razorpay_payment_id;
+    const sign = `${razorpay_order_id}|${razorpay_payment_id}`;
 
-    const expectedSignature = crypto
+    const expectedSign = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-      .update(body)
+      .update(sign)
       .digest("hex");
 
-    if (expectedSignature !== razorpay_signature) {
+    if (expectedSign !== razorpay_signature) {
       return res.status(400).json({
         success: false,
         message: "Invalid payment signature",
@@ -150,7 +150,7 @@ exports.verifyPayment = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("VERIFY PAYMENT ERROR:", error);
+    console.error("❌ Verify Payment Error:", error);
     return res.status(500).json({
       success: false,
       message: "Payment verification failed",
