@@ -168,6 +168,7 @@ const PaymentPage = () => {
                 email: formData.email,
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature, // ✅ ADD THIS
               })
             );
 
@@ -314,12 +315,12 @@ const PaymentPage = () => {
                 </div>
                 */}
               </div>
-              
+
               <div className="p-4">
                 <h2 className="text-lg font-bold text-gray-900 mb-3">
                   {course.title}
                 </h2>
-                
+
                 {/* Features Grid - Compact on Mobile */}
                 <div className=" hidden sm:grid grid-cols-2 gap-2 mb-4">
                   <div className="flex items-center p-2 bg-gray-50 rounded-lg">
@@ -330,7 +331,7 @@ const PaymentPage = () => {
                       <p className="font-semibold text-gray-900 text-xs">Secure</p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center p-2 bg-gray-50 rounded-lg">
                     <div className="w-7 h-7 bg-primary/10 rounded flex items-center justify-center mr-2 flex-shrink-0">
                       <FaBolt className="text-primary text-xs" />
@@ -339,7 +340,7 @@ const PaymentPage = () => {
                       <p className="font-semibold text-gray-900 text-xs">Instant</p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center p-2 bg-gray-50 rounded-lg">
                     <div className="w-7 h-7 bg-primary/10 rounded flex items-center justify-center mr-2 flex-shrink-0">
                       <FaInfinity className="text-primary text-xs" />
@@ -348,7 +349,7 @@ const PaymentPage = () => {
                       <p className="font-semibold text-gray-900 text-xs">Lifetime</p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center p-2 bg-gray-50 rounded-lg">
                     <div className="w-7 h-7 bg-primary/10 rounded flex items-center justify-center mr-2 flex-shrink-0">
                       <FaHeadphonesAlt className="text-primary text-xs" />
@@ -372,7 +373,7 @@ const PaymentPage = () => {
                 <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">
                   {course.title}
                 </h2>
-                
+
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-3">
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
@@ -404,7 +405,7 @@ const PaymentPage = () => {
                       <p className="text-xs sm:text-sm text-gray-600 truncate">100% protected</p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center p-3 bg-gray-50 rounded-lg sm:rounded-xl">
                     <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary/10 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
                       <FaBolt className="text-primary text-sm sm:text-base" />
@@ -414,7 +415,7 @@ const PaymentPage = () => {
                       <p className="text-xs sm:text-sm text-gray-600 truncate">Immediate delivery</p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center p-3 bg-gray-50 rounded-lg sm:rounded-xl">
                     <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary/10 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
                       <FaInfinity className="text-primary text-sm sm:text-base" />
@@ -424,7 +425,7 @@ const PaymentPage = () => {
                       <p className="text-xs sm:text-sm text-gray-600 truncate">Never expires</p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center p-3 bg-gray-50 rounded-lg sm:rounded-xl">
                     <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary/10 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
                       <FaHeadphonesAlt className="text-primary text-sm sm:text-base" />
@@ -473,10 +474,10 @@ const PaymentPage = () => {
 
                   {/* Phone Input */}
                   <div>
-                      <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                        <FaPhone className="inline mr-1 sm:mr-2 text-gray-400" />
-                        Phone Number
-                      </label>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                      <FaPhone className="inline mr-1 sm:mr-2 text-gray-400" />
+                      Phone Number
+                    </label>
                     <div className="relative">
                       <input
                         type="tel"
@@ -605,9 +606,8 @@ const PaymentPage = () => {
                               {[...Array(5)].map((_, i) => (
                                 <FaStar
                                   key={i}
-                                  className={`text-xs sm:text-sm ${
-                                    i < review.rating ? "text-yellow-500" : "text-gray-300"
-                                  }`}
+                                  className={`text-xs sm:text-sm ${i < review.rating ? "text-yellow-500" : "text-gray-300"
+                                    }`}
                                 />
                               ))}
                             </div>
@@ -794,9 +794,8 @@ const PaymentPage = () => {
                                 {[...Array(5)].map((_, i) => (
                                   <FaStar
                                     key={i}
-                                    className={`text-xs ${
-                                      i < review.rating ? "text-yellow-500" : "text-gray-300"
-                                    }`}
+                                    className={`text-xs ${i < review.rating ? "text-yellow-500" : "text-gray-300"
+                                      }`}
                                   />
                                 ))}
                               </div>
