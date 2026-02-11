@@ -146,6 +146,7 @@ const PaymentPage = () => {
         /* ===== SUCCESS ===== */
         handler: async (response) => {
           try {
+            /* ================= VERIFY PAYMENT ================= */
             const verifyRes = await dispatch(
               verifyPayment({
                 razorpay_order_id: response.razorpay_order_id,
@@ -159,6 +160,7 @@ const PaymentPage = () => {
               return;
             }
 
+            /* ================= CREATE PURCHASE ================= */
             const purchaseRes = await dispatch(
               createPurchase({
                 course_id: course._id,
@@ -168,15 +170,36 @@ const PaymentPage = () => {
                 email: formData.email,
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_order_id: response.razorpay_order_id,
-                razorpay_signature: response.razorpay_signature, // ✅ ADD THIS
+                razorpay_signature: response.razorpay_signature,
               })
             );
 
             if (!createPurchase.fulfilled.match(purchaseRes)) {
-              alert("Purchase failed");
+              alert("Purchase processing failed");
               return;
             }
 
+            /* ================= ALREADY PURCHASED ================= */
+            if (purchaseRes.payload?.alreadyPurchased) {
+              alert("You already own this course");
+
+              navigate("/payment-success", {
+                replace: true,
+                state: {
+                  email: formData.email,
+                  phone: formData.phone,
+                  paymentId: response.razorpay_payment_id,
+                  orderId: response.razorpay_order_id,
+                  courseTitle: course.title,
+                  amount: finalPrice,
+                  alreadyPurchased: true,
+                },
+              });
+
+              return;
+            }
+
+            /* ================= SUCCESS EVENT TRACK ================= */
             if (window.fbq) {
               window.fbq("track", "Purchase", {
                 value: finalPrice,
@@ -187,7 +210,9 @@ const PaymentPage = () => {
               });
             }
 
+            /* ================= NAVIGATE SUCCESS ================= */
             navigate("/payment-success", {
+              replace: true,
               state: {
                 email: formData.email,
                 phone: formData.phone,
@@ -197,8 +222,10 @@ const PaymentPage = () => {
                 amount: finalPrice,
               },
             });
-          } catch {
-            alert("Payment done but processing failed");
+
+          } catch (error) {
+            console.error("Payment success handler error:", error);
+            alert("Payment completed but processing failed. Please contact support.");
           }
         },
 
