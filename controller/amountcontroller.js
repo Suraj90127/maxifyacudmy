@@ -64,7 +64,7 @@ exports.createOrder = async (req, res) => {
       // TEMP USER TOKEN
       const token = createToken({
         id: tempUser._id,
-        role: "temp",
+        role: "user",
       });
 
       res.cookie("token", token, {
