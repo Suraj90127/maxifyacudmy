@@ -56,6 +56,7 @@ export const createPurchase = createAsyncThunk(
       email,
       razorpay_payment_id,
       razorpay_order_id,
+      razorpay_signature, // ✅ ADD THIS
     },
     { rejectWithValue }
   ) => {
@@ -68,6 +69,7 @@ export const createPurchase = createAsyncThunk(
         email,
         razorpay_payment_id,
         razorpay_order_id,
+        razorpay_signature, // ✅ ADD THIS
       });
 
       return res.data;
