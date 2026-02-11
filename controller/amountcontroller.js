@@ -33,98 +33,21 @@ const generateNumericReferralCode = async () => {
 
 exports.createOrder = async (req, res) => {
   try {
-    let { amount, email, phone } = req.body;
+    let { amount } = req.body;
 
-    /* =====================
-       AMOUNT VALIDATION
-    ===================== */
     amount = Number(amount);
+
     if (!amount || isNaN(amount) || amount <= 0) {
       return res.status(400).json({
         success: false,
-        message: "Valid amount is required",
+        message: "Valid amount required",
       });
     }
 
-    let user = null;
-
-    /* =====================
-       LOGGED-IN USER
-    ===================== */
-    if (req.user?.id) {
-      user = await User.findById(req.user.id);
-      if (!user) {
-        return res.status(401).json({
-          success: false,
-          message: "Invalid user session",
-        });
-      }
-    }
-
-    /* =====================
-       GUEST USER
-    ===================== */
-    if (!user) {
-      email = normalizeEmail(email);
-
-      if (!email || !phone) {
-        return res.status(400).json({
-          success: false,
-          message: "Email & phone required for guest checkout",
-        });
-      }
-
-      user = await User.findOne({ email });
-
-      if (!user) {
-        const plainPassword = generateRandomPassword(8);
-        const hashedPassword = await bcrypt.hash(plainPassword, 10);
-        const referralCode = await generateNumericReferralCode();
-        const FRONTEND =
-          process.env.FRONTEND_URL || "http://localhost:5173";
-
-        user = await User.create({
-          firstname: email.split("@")[0],
-          lastname: "",
-          email,
-          mobile: phone,
-          password: hashedPassword,
-          temporary_password: plainPassword,
-          referral_code: referralCode,
-          referral_link: `${FRONTEND}/register?ref=${referralCode}`,
-          role: "user",
-          i_agree: true,
-          is_verified: true,
-        });
-      }
-    }
-
-    /* =====================
-       JWT COOKIE SET
-    ===================== */
-    const token = createToken({
-      id: user._id,
-      role: user.role,
-    });
-
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // HTTPS required in live
-      sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
-    /* =====================
-       RAZORPAY ORDER
-    ===================== */
     const order = await razorpay.orders.create({
-      amount: Math.round(amount * 100), // INR → paisa
+      amount: Math.round(amount * 100),
       currency: "INR",
       receipt: `rcpt_${Date.now()}`,
-      notes: {
-        userId: user._id.toString(),
-        email: user.email,
-      },
     });
 
     return res.status(200).json({
@@ -133,18 +56,13 @@ exports.createOrder = async (req, res) => {
       order_id: order.id,
       amount: order.amount,
       currency: order.currency,
-      user_id: user._id,
-      email: user.email,
     });
-  } catch (error) {
-    console.error("❌ CREATE ORDER ERROR:", error?.error || error);
 
+  } catch (error) {
+    console.error("CREATE ORDER ERROR:", error);
     return res.status(500).json({
       success: false,
-      message:
-        error?.error?.description ||
-        error?.message ||
-        "Order creation failed",
+      message: "Order creation failed",
     });
   }
 };
@@ -198,61 +116,139 @@ exports.createPurchase = async (req, res) => {
   try {
     const {
       course_id,
-      is_buy = true,
-      purchased_amount = 0,
+      purchased_amount,
       coupon_amount = 0,
       email,
+      phone,
       razorpay_payment_id,
       razorpay_order_id,
+      razorpay_signature,
     } = req.body;
 
-    let user_id;
+    /* =========================
+       BASIC VALIDATION
+    ========================= */
 
-    /* ===== USER IDENTIFY ===== */
-    if (req.user?.id) {
-      user_id = req.user.id;
-    } else if (email) {
-      const user = await User.findOne({ email: email.toLowerCase() });
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-      user_id = user._id;
-    } else {
-      return res.status(400).json({ message: "User info missing" });
+    if (
+      !course_id ||
+      !razorpay_payment_id ||
+      !razorpay_order_id ||
+      !razorpay_signature
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Incomplete payment data",
+      });
     }
 
-    /* ===== VALIDATIONS ===== */
-    if (!course_id) {
-      return res.status(400).json({ message: "Course ID required" });
+    /* =========================
+       VERIFY SIGNATURE (AGAIN)
+    ========================= */
+
+    const body = razorpay_order_id + "|" + razorpay_payment_id;
+
+    const expectedSignature = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .update(body.toString())
+      .digest("hex");
+
+    if (expectedSignature !== razorpay_signature) {
+      return res.status(400).json({
+        success: false,
+        message: "Payment verification failed",
+      });
     }
 
-    if (!razorpay_payment_id || !razorpay_order_id) {
-      return res.status(400).json({ message: "Payment not verified" });
-    }
+    /* =========================
+       CHECK COURSE
+    ========================= */
 
     const course = await Course.findById(course_id);
+
     if (!course) {
-      return res.status(404).json({ message: "Course not found" });
+      return res.status(404).json({
+        success: false,
+        message: "Course not found",
+      });
     }
 
-    /* ===== DUPLICATE CHECK ===== */
+    /* =========================
+       PREVENT DUPLICATE PAYMENT
+    ========================= */
+
+    const existingPayment = await CoursePurchase.findOne({
+      payment_id: razorpay_payment_id,
+    });
+
+    if (existingPayment) {
+      return res.status(200).json({
+        success: true,
+        message: "Payment already processed",
+      });
+    }
+
+    /* =========================
+       FIND OR CREATE USER
+    ========================= */
+
+    let user;
+
+    if (req.user?.id) {
+      user = await User.findById(req.user.id);
+    } else {
+      const normalizedEmail = email?.trim().toLowerCase();
+
+      if (!normalizedEmail || !phone) {
+        return res.status(400).json({
+          success: false,
+          message: "Email & phone required",
+        });
+      }
+
+      user = await User.findOne({ email: normalizedEmail });
+
+      if (!user) {
+        const plainPassword = generateRandomPassword(8);
+        const hashedPassword = await bcrypt.hash(plainPassword, 10);
+        const referralCode = await generateNumericReferralCode();
+
+        user = await User.create({
+          firstname: normalizedEmail.split("@")[0],
+          email: normalizedEmail,
+          mobile: phone,
+          password: hashedPassword,
+          temporary_password: plainPassword,
+          referral_code: referralCode,
+          role: "user",
+          is_verified: true,
+        });
+      }
+    }
+
+    /* =========================
+       CHECK DUPLICATE COURSE
+    ========================= */
+
     const alreadyPurchased = await CoursePurchase.findOne({
-      user_id,
+      user_id: user._id,
       course_id,
     });
 
     if (alreadyPurchased) {
       return res.status(400).json({
+        success: false,
         message: "Course already purchased",
       });
     }
 
-    /* ===== CREATE PURCHASE ===== */
+    /* =========================
+       CREATE PURCHASE
+    ========================= */
+
     const purchase = await CoursePurchase.create({
-      user_id,
+      user_id: user._id,
       course_id,
-      email,
-      is_buy,
+      email: user.email,
       enrolled: true,
       purchased_amount: Number(purchased_amount),
       coupon_amount: Number(coupon_amount),
@@ -262,8 +258,9 @@ exports.createPurchase = async (req, res) => {
       payment_status: "paid",
     });
 
-    /* ===== SEND LOGIN CREDENTIALS (GUEST) ===== */
-    const user = await User.findById(user_id);
+    /* =========================
+       SEND LOGIN MAIL (GUEST)
+    ========================= */
 
     if (user?.temporary_password) {
       await sendLoginCredentials(
@@ -281,11 +278,10 @@ exports.createPurchase = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("❌ CREATE PURCHASE ERROR:", error);
+    console.error("CREATE PURCHASE ERROR:", error);
     return res.status(500).json({
       success: false,
-      message: "Failed to create purchase",
-      error: error.message,
+      message: "Purchase failed",
     });
   }
 };
