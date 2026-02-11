@@ -9,6 +9,7 @@ const CoursePurchase = require("../models/coursePurchaseModel");
 
 const generateRandomPassword = require("../utils/generatePassword");
 const { sendLoginCredentials } = require("../utils/emailService");
+const createToken = require("../utils/createToken");
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -18,9 +19,8 @@ const razorpay = new Razorpay({
 const normalizeEmail = (email) =>
   email ? email.trim().toLowerCase() : null;
 
-
 /* ===================================================
-   1️⃣ CREATE ORDER
+   1️⃣ CREATE ORDER (Temp User + Token)
 =================================================== */
 
 exports.createOrder = async (req, res) => {
@@ -28,7 +28,6 @@ exports.createOrder = async (req, res) => {
     let { amount, email, phone } = req.body;
 
     amount = Number(amount);
-
     if (!amount || isNaN(amount) || amount <= 0) {
       return res.status(400).json({
         success: false,
@@ -37,7 +36,6 @@ exports.createOrder = async (req, res) => {
     }
 
     email = normalizeEmail(email);
-
     if (!email || !phone) {
       return res.status(400).json({
         success: false,
@@ -45,16 +43,16 @@ exports.createOrder = async (req, res) => {
       });
     }
 
-    const existingUser = await User.findOne({ email });
+    let user = await User.findOne({ email });
 
-    if (!existingUser) {
+    if (!user) {
       let tempUser = await TempUser.findOne({ email });
 
       if (!tempUser) {
         const plainPassword = generateRandomPassword(8);
         const hashedPassword = await bcrypt.hash(plainPassword, 10);
 
-        await TempUser.create({
+        tempUser = await TempUser.create({
           firstname: email.split("@")[0],
           email,
           mobile: phone,
@@ -62,6 +60,32 @@ exports.createOrder = async (req, res) => {
           plain_password: plainPassword,
         });
       }
+
+      // TEMP USER TOKEN
+      const token = createToken({
+        id: tempUser._id,
+        role: "temp",
+      });
+
+      res.cookie("token", token, {
+        httpOnly: true,
+        sameSite: "strict",
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+    } else {
+      // REAL USER TOKEN
+      const token = createToken({
+        id: user._id,
+        role: user.role,
+      });
+
+      res.cookie("token", token, {
+        httpOnly: true,
+        sameSite: "strict",
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
     }
 
     const order = await razorpay.orders.create({
@@ -86,7 +110,6 @@ exports.createOrder = async (req, res) => {
     });
   }
 };
-
 
 /* ===================================================
    2️⃣ VERIFY PAYMENT
@@ -135,9 +158,8 @@ exports.verifyPayment = async (req, res) => {
   }
 };
 
-
 /* ===================================================
-   3️⃣ CREATE PURCHASE (MAIN LOGIC)
+   3️⃣ CREATE PURCHASE (Temp → Real Conversion)
 =================================================== */
 
 exports.createPurchase = async (req, res) => {
@@ -201,7 +223,6 @@ exports.createPurchase = async (req, res) => {
     }
 
     const normalizedEmail = normalizeEmail(email);
-
     let user = await User.findOne({ email: normalizedEmail });
 
     /* Convert Temp → Real */
@@ -220,14 +241,14 @@ exports.createPurchase = async (req, res) => {
         lastname: tempUser.lastname,
         email: tempUser.email,
         mobile: tempUser.mobile,
-        password: tempUser.password, // hashed
+        password: tempUser.password,
         role: "user",
         is_verified: true,
       });
 
       await sendLoginCredentials(
         user.email,
-        tempUser.plain_password // send correct password
+        tempUser.plain_password
       );
 
       await TempUser.deleteOne({ _id: tempUser._id });
@@ -258,6 +279,19 @@ exports.createPurchase = async (req, res) => {
       payment_id: razorpay_payment_id,
       order_id: razorpay_order_id,
       payment_status: "paid",
+    });
+
+    /* ISSUE REAL USER TOKEN AFTER PURCHASE */
+    const token = createToken({
+      id: user._id,
+      role: user.role,
+    });
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     return res.status(200).json({
