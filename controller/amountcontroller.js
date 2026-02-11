@@ -3,37 +3,29 @@ const crypto = require("crypto");
 const bcrypt = require("bcrypt");
 
 const User = require("../models/UserModel");
+const TempUser = require("../models/TempUser");
 const Course = require("../models/Course");
 const CoursePurchase = require("../models/coursePurchaseModel");
 
 const generateRandomPassword = require("../utils/generatePassword");
 const { sendLoginCredentials } = require("../utils/emailService");
-const createToken = require("../utils/createToken");
-
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-
 const normalizeEmail = (email) =>
   email ? email.trim().toLowerCase() : null;
 
-const generateNumericReferralCode = async () => {
-  let code, exists = true;
 
-  while (exists) {
-    code = Math.floor(10000000 + Math.random() * 90000000).toString();
-    exists = await User.findOne({ referral_code: code });
-  }
-  return code;
-};
-
+/* ===================================================
+   1️⃣ CREATE ORDER
+=================================================== */
 
 exports.createOrder = async (req, res) => {
   try {
-    let { amount } = req.body;
+    let { amount, email, phone } = req.body;
 
     amount = Number(amount);
 
@@ -42,6 +34,34 @@ exports.createOrder = async (req, res) => {
         success: false,
         message: "Valid amount required",
       });
+    }
+
+    email = normalizeEmail(email);
+
+    if (!email || !phone) {
+      return res.status(400).json({
+        success: false,
+        message: "Email & phone required",
+      });
+    }
+
+    const existingUser = await User.findOne({ email });
+
+    if (!existingUser) {
+      let tempUser = await TempUser.findOne({ email });
+
+      if (!tempUser) {
+        const plainPassword = generateRandomPassword(8);
+        const hashedPassword = await bcrypt.hash(plainPassword, 10);
+
+        await TempUser.create({
+          firstname: email.split("@")[0],
+          email,
+          mobile: phone,
+          password: hashedPassword,
+          plain_password: plainPassword,
+        });
+      }
     }
 
     const order = await razorpay.orders.create({
@@ -68,6 +88,10 @@ exports.createOrder = async (req, res) => {
 };
 
 
+/* ===================================================
+   2️⃣ VERIFY PAYMENT
+=================================================== */
+
 exports.verifyPayment = async (req, res) => {
   try {
     const {
@@ -83,14 +107,14 @@ exports.verifyPayment = async (req, res) => {
       });
     }
 
-    const sign = `${razorpay_order_id}|${razorpay_payment_id}`;
+    const body = razorpay_order_id + "|" + razorpay_payment_id;
 
-    const expectedSign = crypto
+    const expectedSignature = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-      .update(sign)
+      .update(body)
       .digest("hex");
 
-    if (expectedSign !== razorpay_signature) {
+    if (expectedSignature !== razorpay_signature) {
       return res.status(400).json({
         success: false,
         message: "Invalid payment signature",
@@ -103,7 +127,7 @@ exports.verifyPayment = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("❌ Verify Payment Error:", error);
+    console.error("VERIFY PAYMENT ERROR:", error);
     return res.status(500).json({
       success: false,
       message: "Payment verification failed",
@@ -112,22 +136,21 @@ exports.verifyPayment = async (req, res) => {
 };
 
 
+/* ===================================================
+   3️⃣ CREATE PURCHASE (MAIN LOGIC)
+=================================================== */
+
 exports.createPurchase = async (req, res) => {
   try {
     const {
       course_id,
-      purchased_amount,
-      coupon_amount = 0,
       email,
-      phone,
       razorpay_payment_id,
       razorpay_order_id,
       razorpay_signature,
+      purchased_amount = 0,
+      coupon_amount = 0,
     } = req.body;
-
-    /* =========================
-       BASIC VALIDATION
-    ========================= */
 
     if (
       !course_id ||
@@ -141,15 +164,12 @@ exports.createPurchase = async (req, res) => {
       });
     }
 
-    /* =========================
-       VERIFY SIGNATURE (AGAIN)
-    ========================= */
-
+    /* Verify Signature Again */
     const body = razorpay_order_id + "|" + razorpay_payment_id;
 
     const expectedSignature = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-      .update(body.toString())
+      .update(body)
       .digest("hex");
 
     if (expectedSignature !== razorpay_signature) {
@@ -159,23 +179,7 @@ exports.createPurchase = async (req, res) => {
       });
     }
 
-    /* =========================
-       CHECK COURSE
-    ========================= */
-
-    const course = await Course.findById(course_id);
-
-    if (!course) {
-      return res.status(404).json({
-        success: false,
-        message: "Course not found",
-      });
-    }
-
-    /* =========================
-       PREVENT DUPLICATE PAYMENT
-    ========================= */
-
+    /* Prevent Duplicate Payment */
     const existingPayment = await CoursePurchase.findOne({
       payment_id: razorpay_payment_id,
     });
@@ -187,48 +191,49 @@ exports.createPurchase = async (req, res) => {
       });
     }
 
-    /* =========================
-       FIND OR CREATE USER
-    ========================= */
-
-    let user;
-
-    if (req.user?.id) {
-      user = await User.findById(req.user.id);
-    } else {
-      const normalizedEmail = email?.trim().toLowerCase();
-
-      if (!normalizedEmail || !phone) {
-        return res.status(400).json({
-          success: false,
-          message: "Email & phone required",
-        });
-      }
-
-      user = await User.findOne({ email: normalizedEmail });
-
-      if (!user) {
-        const plainPassword = generateRandomPassword(8);
-        const hashedPassword = await bcrypt.hash(plainPassword, 10);
-        const referralCode = await generateNumericReferralCode();
-
-        user = await User.create({
-          firstname: normalizedEmail.split("@")[0],
-          email: normalizedEmail,
-          mobile: phone,
-          password: hashedPassword,
-          temporary_password: plainPassword,
-          referral_code: referralCode,
-          role: "user",
-          is_verified: true,
-        });
-      }
+    /* Check Course */
+    const course = await Course.findById(course_id);
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found",
+      });
     }
 
-    /* =========================
-       CHECK DUPLICATE COURSE
-    ========================= */
+    const normalizedEmail = normalizeEmail(email);
 
+    let user = await User.findOne({ email: normalizedEmail });
+
+    /* Convert Temp → Real */
+    if (!user) {
+      const tempUser = await TempUser.findOne({ email: normalizedEmail });
+
+      if (!tempUser) {
+        return res.status(404).json({
+          success: false,
+          message: "Temp user not found",
+        });
+      }
+
+      user = await User.create({
+        firstname: tempUser.firstname,
+        lastname: tempUser.lastname,
+        email: tempUser.email,
+        mobile: tempUser.mobile,
+        password: tempUser.password, // hashed
+        role: "user",
+        is_verified: true,
+      });
+
+      await sendLoginCredentials(
+        user.email,
+        tempUser.plain_password // send correct password
+      );
+
+      await TempUser.deleteOne({ _id: tempUser._id });
+    }
+
+    /* Prevent Duplicate Course */
     const alreadyPurchased = await CoursePurchase.findOne({
       user_id: user._id,
       course_id,
@@ -241,10 +246,7 @@ exports.createPurchase = async (req, res) => {
       });
     }
 
-    /* =========================
-       CREATE PURCHASE
-    ========================= */
-
+    /* Create Purchase */
     const purchase = await CoursePurchase.create({
       user_id: user._id,
       course_id,
@@ -257,19 +259,6 @@ exports.createPurchase = async (req, res) => {
       order_id: razorpay_order_id,
       payment_status: "paid",
     });
-
-    /* =========================
-       SEND LOGIN MAIL (GUEST)
-    ========================= */
-
-    if (user?.temporary_password) {
-      await sendLoginCredentials(
-        user.email,
-        user.temporary_password
-      );
-      user.temporary_password = null;
-      await user.save();
-    }
 
     return res.status(200).json({
       success: true,

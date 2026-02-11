@@ -6,6 +6,7 @@ const TempUserSchema = new mongoose.Schema({
   email: String,
   mobile: String,
   password: String,
+  plain_password: String,
   referral_code: String,
   referrer_id: String,
   otp: String,
