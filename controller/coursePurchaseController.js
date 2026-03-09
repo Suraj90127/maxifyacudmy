@@ -60,12 +60,17 @@ exports.createPurchase = async (req, res) => {
 
     // Referral Commission (40%)
     if (user.ref_by && purchase.purchased_amount > 0) {
+
       const referrer = await User.findOne({
         referral_code: user.ref_by,
       });
 
       if (referrer) {
-        const commission = (Number(purchase.purchased_amount) * 40) / 100;
+
+        const commissionPercent = course.referral_commission || 0;
+
+        const commission =
+          (Number(purchase.purchased_amount) * commissionPercent) / 100;
 
         await User.findByIdAndUpdate(referrer._id, {
           $inc: {

@@ -49,7 +49,7 @@ const testimonials = Array.isArray(reviewData)
 
 
   const settings = {
-    dots: true,
+    dots: false,
     infinite: true,
     speed: 800,
     slidesToShow: 1,

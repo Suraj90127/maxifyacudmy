@@ -9,6 +9,7 @@ export const createWithdrawal = createAsyncThunk(
   async (formData, { rejectWithValue }) => {
     try {
       const { data } = await api.post("/withdrawal/create", formData);
+      console.log(data);
       return data.data;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || "Request failed");

@@ -65,68 +65,84 @@ export default function Courses() {
               const ratingCount = Math.round(item.average_rating || 0);
 
               return (
-                <Link 
-                        to={`/course-info/${item._id}`}>
-                <div key={item._id} className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 flex flex-col hover:shadow-xl transition-shadow duration-300">
-                  
-                  {/* Thumbnail Section */}
-                  <div className="relative group overflow-hidden">
-                    <img 
-                      src={item.image || "https://via.placeholder.com/400x250"} 
-                      alt={item.title} 
-                      className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    {/* Premium/Category Badge */}
-                    <div className="absolute top-4 left-4 bg-[#FF4D4D] text-white text-[10px] font-bold px-3 py-1 rounded flex items-center gap-1 uppercase tracking-widest">
-                      <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
-                      {categoryName}
-                    </div>
-                  </div>
+                <Link
+                  to={`/course-info/${item._id}`}>
+                  <div key={item._id} className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 flex flex-col hover:shadow-xl transition-shadow duration-300">
 
-                  {/* Content Section */}
-                  <div className="p-6 flex flex-col flex-grow">
-                    <h2 className="text-xl font-bold text-gray-800 leading-snug mb-3 line-clamp-2 h-14">
-                      {item.title}
-                    </h2>
-
-                    <div className="flex justify-between items-center mb-6">
-                      <p className="text-gray-500 text-sm font-medium">
-                        {item.review_count || 0} Students Rated
-                      </p>
-                      
-                      {/* Rating Stars */}
-                      <div className="flex text-[#FFD700] space-x-0.5">
-                        {[...Array(5)].map((_, i) => (
-                          i < ratingCount ? <FaStar key={i} size={16} /> : <FaRegStar key={i} size={16} className="text-gray-300" />
-                        ))}
+                    {/* Thumbnail Section */}
+                    <div className="relative group overflow-hidden">
+                      <img
+                        src={item.image || "https://via.placeholder.com/400x250"}
+                        alt={item.title}
+                        className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      {/* Premium/Category Badge */}
+                      <div className="absolute top-4 left-4 bg-[#FF4D4D] text-white text-[10px] font-bold px-3 py-1 rounded flex items-center gap-1 uppercase tracking-widest">
+                        <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
+                        {categoryName}
                       </div>
+
+
                     </div>
 
-                    <hr className="border-gray-50 mb-6" />
+                    {/* Content Section */}
+                    <div className="p-6 flex flex-col flex-grow">
+                      <h2 className="text-xl font-bold text-gray-800 leading-snug mb-3 line-clamp-2 h-14">
+                        {item.title}
+                      </h2>
 
-                    {/* Footer Section: Pricing and CTA */}
-                    <div className="mt-auto flex items-center justify-between gap-2">
-                      <div className="flex flex-col">
-                        {item.discount_price && (
-                          <span className="text-gray-400 line-through text-sm font-medium">
-                             ₹{item.price}
+                      <div className="flex justify-between items-center mb-6">
+
+                        <div className="flex items-center gap-3">
+                          <p className="text-gray-500 text-sm font-medium">
+                            {item.review_count || 0} Students Rated
+                          </p>
+
+                          {item.referral_commission > 0 && (
+                            <span className="bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-1 rounded-full">
+                              Refer & Earn ₹{item.referral_commission}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Rating Stars */}
+                        <div className="flex text-[#FFD700] space-x-0.5">
+                          {[...Array(5)].map((_, i) =>
+                            i < ratingCount ? (
+                              <FaStar key={i} size={16} />
+                            ) : (
+                              <FaRegStar key={i} size={16} className="text-gray-300" />
+                            )
+                          )}
+                        </div>
+
+                      </div>
+
+                      <hr className="border-gray-50 mb-6" />
+
+                      {/* Footer Section: Pricing and CTA */}
+                      <div className="mt-auto flex items-center justify-between gap-2">
+                        <div className="flex flex-col">
+                          {item.discount_price && (
+                            <span className="text-gray-400 line-through text-sm font-medium">
+                              ₹{item.price}
+                            </span>
+                          )}
+                          <span className="text-xl font-black text-gray-900">
+                            ₹{item.discount_price || item.price}
                           </span>
-                        )}
-                        <span className="text-xl font-black text-gray-900">
-                          ₹{item.discount_price || item.price}
-                        </span>
-                      </div>
+                        </div>
 
-                      <Link 
-                        to={`/course-info/${item._id}`}
-                        className="bg-gray-100 hover:bg-gray-200 text-gray-900 font-bold py-2.5 px-5 rounded-full flex items-center gap-2 transition-all text-sm whitespace-nowrap"
-                      >
-                        <FaPlayCircle size={18} className="text-gray-700" />
-                        Enroll Now
-                      </Link>
+                        <Link
+                          to={`/course-info/${item._id}`}
+                          className="bg-gray-100 hover:bg-gray-200 text-gray-900 font-bold py-2.5 px-5 rounded-full flex items-center gap-2 transition-all text-sm whitespace-nowrap"
+                        >
+                          <FaPlayCircle size={18} className="text-gray-700" />
+                          Enroll Now
+                        </Link>
+                      </div>
                     </div>
                   </div>
-                </div>
                 </Link>
               );
             })}

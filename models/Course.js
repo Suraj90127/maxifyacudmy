@@ -48,6 +48,13 @@ const courseSchema = new mongoose.Schema(
       default: 0,
     },
 
+    referral_commission: {
+      type: Number,
+      default: 0, // percentage
+      min: 0,
+      max: 100,
+    },
+
     /* ================= SEO ================= */
     meta_keyword: {
       type: [String],

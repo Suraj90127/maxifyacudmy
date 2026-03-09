@@ -6,23 +6,32 @@ const WithdrawalSchema = new mongoose.Schema(
     user_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
       index: true,
+      required: true
+    },
+
+    payment_method: {
+      type: String,
+      enum: ["bank", "upi"],
+      required: true
     },
 
     account_name: {
       type: String,
-      required: true,
       trim: true,
+      required: function () {
+        return this.payment_method === "bank";
+      },
     },
 
     account_number: {
       type: String,
-      required: true,
-      select: false, // hidden by default
+      select: false,
+      required: function () {
+        return this.payment_method === "bank";
+      },
     },
 
-    // AUTO-GENERATED
     account_last4: {
       type: String,
       default: "",
@@ -31,24 +40,48 @@ const WithdrawalSchema = new mongoose.Schema(
 
     bank_name: {
       type: String,
-      required: true,
       trim: true,
+      required: function () {
+        return this.payment_method === "bank";
+      },
     },
 
     ifsc_code: {
       type: String,
-      required: true,
       uppercase: true,
       trim: true,
       match: [/^[A-Z]{4}0[A-Z0-9]{6}$/, "Invalid IFSC code"],
+      required: function () {
+        return this.payment_method === "bank";
+      },
     },
 
     withdraw_amount: {
       type: Number,
-      required: true,
       min: 1,
+      required: true
     },
 
+    // ---------------- UPI DETAILS ----------------
+
+    upi_id: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      match: [/^[\w.-]+@[\w.-]+$/, "Invalid UPI ID"],
+      required: function () {
+        return this.payment_method === "upi";
+      },
+    },
+
+    upi_name: {
+      type: String,
+      trim: true,
+      required: function () {
+        return this.payment_method === "upi";
+      },
+    },
+    
     status: {
       type: String,
       enum: ["pending", "processing", "completed", "failed"],

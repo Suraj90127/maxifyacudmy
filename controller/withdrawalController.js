@@ -8,18 +8,26 @@ const { decrypt } = require("../utils/encryption");
 exports.createWithdrawal = async (req, res) => {
   try {
     const {
+      payment_method,
       account_name,
       account_number,
       bank_name,
       ifsc_code,
+      upi_id,
+      upi_name,
       withdraw_amount
     } = req.body;
 
-    // Convert amount to number
     const amount = Number(withdraw_amount);
 
+    // -----------------------------
+    // Amount Validation
+    // -----------------------------
     if (!amount || amount <= 0) {
-      return res.status(400).json({ success: false, message: "Invalid withdrawal amount." });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid withdrawal amount."
+      });
     }
 
     if (amount % 1000 !== 0) {
@@ -29,18 +37,55 @@ exports.createWithdrawal = async (req, res) => {
       });
     }
 
-    // ----------------------------------------------------
-    // 1️⃣ Fetch user wallet balance
-    // ----------------------------------------------------
+    // -----------------------------
+    // Payment Method Validation
+    // -----------------------------
+    if (!["bank", "upi"].includes(payment_method)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid payment method. Use bank or upi."
+      });
+    }
+
+    // -----------------------------
+    // Bank Validation
+    // -----------------------------
+    if (payment_method === "bank") {
+      if (!account_name || !account_number || !bank_name || !ifsc_code) {
+        return res.status(400).json({
+          success: false,
+          message: "Bank details are required."
+        });
+      }
+    }
+
+    // -----------------------------
+    // UPI Validation
+    // -----------------------------
+    if (payment_method === "upi") {
+      if (!upi_id || !upi_name) {
+        return res.status(400).json({
+          success: false,
+          message: "UPI ID and UPI Name are required."
+        });
+      }
+    }
+
+    // -----------------------------
+    // Fetch User
+    // -----------------------------
     const user = await User.findById(req.user.id);
 
     if (!user) {
-      return res.status(404).json({ success: false, message: "User not found." });
+      return res.status(404).json({
+        success: false,
+        message: "User not found."
+      });
     }
 
-    // ----------------------------------------------------
-    // 2️⃣ Check if user has enough balance
-    // ----------------------------------------------------
+    // -----------------------------
+    // Balance Check
+    // -----------------------------
     if (user.credit < amount) {
       return res.status(400).json({
         success: false,
@@ -48,37 +93,43 @@ exports.createWithdrawal = async (req, res) => {
       });
     }
 
-    // ----------------------------------------------------
-    // 3️⃣ Deduct balance from user
-    // ----------------------------------------------------
+    // -----------------------------
+    // Deduct Balance
+    // -----------------------------
     user.credit -= amount;
     await user.save();
 
-    // ----------------------------------------------------
-    // 4️⃣ Create withdrawal request
-    // ----------------------------------------------------
+    // -----------------------------
+    // Create Withdrawal
+    // -----------------------------
     const withdrawal = await Withdrawal.create({
       user_id: req.user.id,
+      payment_method,
       account_name,
       account_number,
       bank_name,
       ifsc_code,
+      upi_id,
+      upi_name,
       withdraw_amount: amount,
     });
 
-    // ----------------------------------------------------
-    // 5️⃣ Response
-    // ----------------------------------------------------
+    // -----------------------------
+    // Response
+    // -----------------------------
     res.status(201).json({
       success: true,
       message: "Withdrawal request submitted successfully.",
       data: withdrawal,
-      new_balance: user.wallet_balance
+      new_balance: user.credit
     });
 
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({
+      success: false,
+      message: err.message
+    });
   }
 };
 

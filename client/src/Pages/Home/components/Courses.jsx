@@ -61,7 +61,7 @@ export default function Courses() {
       {/* GRID */}
       <div className="w-full py-8 bg-white">
         <div className="max-w-7xl mx-auto px-4 lg:px-0">
-          
+
 
           {/* COURSES GRID */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -100,28 +100,30 @@ export default function Courses() {
                       </h2>
 
                       <div className="flex justify-between items-center mb-6">
-                        <p className="text-gray-500 text-sm font-medium">
-                          {item.review_count || 0} Students Rated
-                        </p>
+
+                        <div className="flex items-center gap-3">
+                          <p className="text-gray-500 text-sm font-medium">
+                            {item.review_count || 0} Students Rated
+                          </p>
+
+                          {item.referral_commission > 0 && (
+                            <span className="bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-1 rounded-full">
+                              Refer & Earn ₹{item.referral_commission}
+                            </span>
+                          )}
+                        </div>
 
                         {/* Rating Stars */}
-                        <div className="flex space-x-0.5">
+                        <div className="flex text-[#FFD700] space-x-0.5">
                           {[...Array(5)].map((_, i) =>
                             i < ratingCount ? (
-                              <FaStar
-                                key={i}
-                                size={16}
-                                className="text-yellow-400"
-                              />
+                              <FaStar key={i} size={16} />
                             ) : (
-                              <FaRegStar
-                                key={i}
-                                size={16}
-                                className="text-gray-300"
-                              />
+                              <FaRegStar key={i} size={16} className="text-gray-300" />
                             )
                           )}
                         </div>
+
                       </div>
 
                       <hr className="border-gray-50 mb-6" />
