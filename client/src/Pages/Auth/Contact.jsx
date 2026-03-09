@@ -414,7 +414,7 @@ const ContactPage = () => {
                   <div>
                     <h5 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-1">Our Location</h5>
                     <p className="text-lg font-bold text-gray-900 leading-snug max-w-xs">
-                      Garhi Khaira Jamui, Jamui, BIHAR 811317
+                      Block D, Noida sector 2, UP, 201301, India
                     </p>
                   </div>
                 </div>
@@ -427,7 +427,7 @@ const ContactPage = () => {
                   <div>
                     <h5 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-1">Call Support</h5>
                     <a href="tel:+917033976030" className="text-xl font-black text-gray-900 hover:text-cyan-500 transition-colors">
-                      +91 7033976030
+                      +91 8106716674
                     </a>
                   </div>
                 </div>

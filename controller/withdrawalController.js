@@ -7,12 +7,12 @@ const { decrypt } = require("../utils/encryption");
 // ----------------------------------------------------
 exports.createWithdrawal = async (req, res) => {
   try {
-    const { 
-      account_name, 
-      account_number, 
-      bank_name, 
-      ifsc_code, 
-      withdraw_amount 
+    const {
+      account_name,
+      account_number,
+      bank_name,
+      ifsc_code,
+      withdraw_amount
     } = req.body;
 
     // Convert amount to number
@@ -20,6 +20,13 @@ exports.createWithdrawal = async (req, res) => {
 
     if (!amount || amount <= 0) {
       return res.status(400).json({ success: false, message: "Invalid withdrawal amount." });
+    }
+
+    if (amount % 1000 !== 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Withdrawal amount must be in multiples of 1000 (1000, 2000, 3000...)."
+      });
     }
 
     // ----------------------------------------------------

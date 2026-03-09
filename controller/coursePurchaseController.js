@@ -15,6 +15,7 @@ exports.createPurchase = async (req, res) => {
       razorpay_payment_id,
       razorpay_order_id,
     } = req.body;
+
     const user_id = req.user.id;
 
     if (!course_id) {
@@ -38,11 +39,12 @@ exports.createPurchase = async (req, res) => {
     });
 
     if (alreadyPurchased) {
-      return res
-        .status(400)
-        .json({ message: "You have already purchased this course." });
+      return res.status(400).json({
+        message: "You have already purchased this course.",
+      });
     }
 
+    // Create Purchase
     const purchase = await CoursePurchase.create({
       user_id,
       course_id,
@@ -50,12 +52,29 @@ exports.createPurchase = async (req, res) => {
       enrolled: true,
       purchased_amount: Number(purchased_amount),
       coupon_amount: Number(coupon_amount),
-
       payment_gateway: "razorpay",
       payment_id: razorpay_payment_id,
       order_id: razorpay_order_id,
       payment_status: "paid",
     });
+
+    // Referral Commission (40%)
+    if (user.ref_by && purchase.purchased_amount > 0) {
+      const referrer = await User.findOne({
+        referral_code: user.ref_by,
+      });
+
+      if (referrer) {
+        const commission = (Number(purchase.purchased_amount) * 40) / 100;
+
+        await User.findByIdAndUpdate(referrer._id, {
+          $inc: {
+            credit: commission,
+            referrals_count: 1,
+          },
+        });
+      }
+    }
 
     return res.status(200).json({
       message: "Course purchased successfully.",

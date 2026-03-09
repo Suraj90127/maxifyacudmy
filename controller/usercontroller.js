@@ -29,9 +29,7 @@ const generateNumericReferralCode = async () => {
   return code;
 };
 
-/* ======================================================
-   REGISTER USER → SAVE TEMP + SEND OTP
-====================================================== */
+
 exports.registerUser = async (req, res) => {
   try {
     let {
@@ -93,9 +91,7 @@ exports.registerUser = async (req, res) => {
   }
 };
 
-/* ======================================================
-   VERIFY OTP → CREATE FINAL USER → AUTO LOGIN
-====================================================== */
+
 exports.verifyOTP = async (req, res) => {
   try {
     const { otp } = req.body;
@@ -132,16 +128,6 @@ exports.verifyOTP = async (req, res) => {
     });
 
     // Referral credit
-    if (tempUser.referral_code) {
-      const referrer = await User.findOne({
-        referral_code: tempUser.referral_code,
-      });
-      if (referrer) {
-        await User.findByIdAndUpdate(referrer._id, {
-          $inc: { credit: 50, referrals_count: 1 },
-        });
-      }
-    }
 
     await TempUser.deleteOne({ email: tempUser.email });
 
@@ -170,9 +156,7 @@ exports.verifyOTP = async (req, res) => {
   }
 };
 
-/* ======================================================
-   LOGIN USER
-====================================================== */
+
 exports.loginUser = async (req, res) => {
   try {
     let { login, password } = req.body;
