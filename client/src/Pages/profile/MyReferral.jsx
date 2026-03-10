@@ -2,14 +2,17 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getProfile } from "../../redux/slices/authSlice";
 import { createWithdrawal, getMyWithdrawals } from "../../redux/slices/withdrawalSlice";
+import { getAllCourses } from "../../redux/slices/courseSlice";
 import { toast } from "react-toastify";
 import { Copy, Wallet, Link2, X, Banknote } from "lucide-react";
 
 export const MyReferral = () => {
 
   const dispatch = useDispatch();
+
   const { user } = useSelector((state) => state.auth);
-  const { loading, myWithdrawals: withdrawals} = useSelector((state) => state.withdrawal);
+  const { loading, myWithdrawals: withdrawals } = useSelector((state) => state.withdrawal);
+  const { courses } = useSelector((state) => state.courses);
 
   const [showModal, setShowModal] = useState(false);
 
@@ -24,24 +27,26 @@ export const MyReferral = () => {
     withdraw_amount: "",
   });
 
-  // scroll top
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  // load data
   useEffect(() => {
     dispatch(getProfile());
     dispatch(getMyWithdrawals());
+    dispatch(getAllCourses());
   }, [dispatch]);
 
-  const referralLink =
-    user?.referral_link ||
-    "https://course.super-club.xyz/user/register?referral_code=68F1F0C23C0BC";
+  const referralLink = user?.referral_link || "";
 
   const copyReferral = () => {
     navigator.clipboard.writeText(referralLink);
     toast.success("Referral link copied!");
+  };
+
+  const generateCourseReferral = (slug) => {
+    if (!referralLink) return "";
+    return `${referralLink}&course=${slug}`;
   };
 
   const handleChange = (e) => {
@@ -66,7 +71,7 @@ export const MyReferral = () => {
     }
 
     if (!withdrawAmount || withdrawAmount < 1) {
-      return toast.error("Enter a valid amount");
+      return toast.error("Enter valid amount");
     }
 
     if (withdrawAmount % 1000 !== 0) {
@@ -74,7 +79,7 @@ export const MyReferral = () => {
     }
 
     if (withdrawAmount > maxCredit) {
-      return toast.error("Amount exceeds available credits");
+      return toast.error("Amount exceeds credits");
     }
 
     const result = await dispatch(createWithdrawal({
@@ -121,12 +126,10 @@ export const MyReferral = () => {
       {/* DASHBOARD */}
       <div className="grid md:grid-cols-3 gap-6 mb-6">
 
-        {/* CREDITS */}
         <div className="bg-white rounded-xl shadow p-5 flex items-center gap-4">
           <div className="p-3 bg-green-100 rounded-full">
             <Wallet className="text-green-600" />
           </div>
-
           <div>
             <p className="text-gray-500 text-sm">Total Credits</p>
             <p className="text-2xl font-bold text-green-600">
@@ -135,12 +138,10 @@ export const MyReferral = () => {
           </div>
         </div>
 
-        {/* REFERRALS */}
         <div className="bg-white rounded-xl shadow p-5 flex items-center gap-4">
           <div className="p-3 bg-purple-100 rounded-full">
             <Link2 className="text-purple-600" />
           </div>
-
           <div>
             <p className="text-gray-500 text-sm">Total Referrals</p>
             <p className="text-2xl font-bold text-purple-600">
@@ -149,22 +150,22 @@ export const MyReferral = () => {
           </div>
         </div>
 
-        {/* WITHDRAW */}
         <button
           onClick={() => setShowModal(true)}
-          className="bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl shadow p-5 flex items-center gap-4 transition"
+          className="bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl shadow p-5 flex items-center gap-4"
         >
           <Banknote />
-          <span className="font-semibold">Withdraw Earnings</span>
+          Withdraw Earnings
         </button>
+
       </div>
 
-      {/* REFERRAL LINK */}
+      {/* BASE REFERRAL */}
       <div className="bg-white rounded-xl shadow p-6">
 
         <p className="font-semibold mb-2">Your Referral Link</p>
 
-        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex gap-3">
 
           <input
             value={referralLink}
@@ -174,30 +175,67 @@ export const MyReferral = () => {
 
           <button
             onClick={copyReferral}
-            className="flex items-center justify-center gap-2 px-5 py-3 bg-[#5d45fd] text-white rounded-lg hover:bg-[#4a37d9]"
+            className="flex items-center gap-2 px-5 py-3 bg-[#5d45fd] text-white rounded-lg"
           >
             <Copy size={18} /> Copy
           </button>
 
         </div>
 
-        <div className="flex flex-wrap gap-3 mt-5">
+      </div>
 
-          <a
-            href={`https://wa.me/?text=Join%20me!%20${encodeURIComponent(referralLink)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-5 py-3 bg-green-600 text-white rounded-lg"
-          >
-            WhatsApp
-          </a>
+      {/* COURSE REFERRALS */}
+      <div className="bg-white rounded-xl shadow p-6 mt-6">
 
-          <a
-            href={`mailto:?subject=Join me!&body=Use my referral link: ${referralLink}`}
-            className="px-5 py-3 bg-gray-600 text-white rounded-lg"
-          >
-            Email
-          </a>
+        <h2 className="text-lg font-semibold mb-4">Refer Courses</h2>
+
+        <div className="grid md:grid-cols-3 gap-4">
+
+          {courses?.map((course) => {
+
+            const link = generateCourseReferral(course._id);
+
+            return (
+              <div key={course._id} className="border rounded-lg p-4 flex flex-col gap-3">
+
+                <img
+                  src={course.image}
+                  alt={course.title}
+                  className="rounded h-40 object-cover"
+                />
+
+                <h3 className="font-semibold">{course.title}</h3>
+
+                <input
+                  value={link}
+                  readOnly
+                  className="border rounded px-3 py-2 text-sm"
+                />
+
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(link);
+                    toast.success("Course referral copied!");
+                  }}
+                  className="bg-[#5d45fd] text-white rounded-lg py-2 text-sm"
+                >
+                  Copy Link
+                </button>
+
+                <a
+                  href={`https://wa.me/?text=${encodeURIComponent(
+                    `Join this course 🚀 ${link}`
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-green-600 text-white text-center rounded-lg py-2 text-sm"
+                >
+                  Share WhatsApp
+                </a>
+
+              </div>
+            );
+          })}
 
         </div>
 
@@ -211,135 +249,42 @@ export const MyReferral = () => {
         {withdrawals?.length === 0 ? (
           <p className="text-gray-500">No withdrawals yet</p>
         ) : (
-          <div className="overflow-x-auto">
+          <table className="w-full text-sm">
 
-            <table className="w-full text-sm">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="p-3 text-left">Amount</th>
+                <th className="p-3">Method</th>
+                <th className="p-3">Status</th>
+                <th className="p-3">Date</th>
+              </tr>
+            </thead>
 
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="p-3 text-left">Amount</th>
-                  <th className="p-3 text-left">Method</th>
-                  <th className="p-3 text-left">Status</th>
-                  <th className="p-3 text-left">Date</th>
+            <tbody>
+              {withdrawals?.map((w) => (
+                <tr key={w._id} className="border-t">
+
+                  <td className="p-3 text-green-600 font-semibold">
+                    ₹ {w.withdraw_amount}
+                  </td>
+
+                  <td className="p-3">{w.payment_method}</td>
+
+                  <td className="p-3">{w.status}</td>
+
+                  <td className="p-3">
+                    {new Date(w.createdAt).toLocaleDateString()}
+                  </td>
+
                 </tr>
-              </thead>
+              ))}
+            </tbody>
 
-              <tbody>
-                {withdrawals?.map((w) => (
-                  <tr key={w._id} className="border-t">
-
-                    <td className="p-3 font-semibold text-green-600">
-                      ₹ {w.withdraw_amount}
-                    </td>
-
-                    <td className="p-3">
-                      {w.payment_method === "bank" ? "Bank" : "UPI"}
-                    </td>
-
-                    <td className="p-3">
-                      <span
-                        className={`px-2 py-1 rounded text-xs ${
-                          w.status === "pending"
-                            ? "bg-yellow-100 text-yellow-700"
-                            : w.status === "completed"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-red-100 text-red-700"
-                        }`}
-                      >
-                        {w.status}
-                      </span>
-                    </td>
-
-                    <td className="p-3">
-                      {new Date(w.createdAt).toLocaleDateString()}
-                    </td>
-
-                  </tr>
-                ))}
-              </tbody>
-
-            </table>
-
-          </div>
+          </table>
         )}
+
       </div>
 
-      {/* MODAL */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-
-          <div className="bg-white rounded-xl w-full max-w-lg shadow-lg">
-
-            <div className="flex justify-between items-center p-5 border-b">
-              <h3 className="text-xl font-semibold">Withdraw Credits</h3>
-              <button onClick={() => setShowModal(false)}>
-                <X />
-              </button>
-            </div>
-
-            <div className="p-6 space-y-4">
-
-              <div>
-                <label className="text-sm font-medium">Payment Method</label>
-                <select
-                  name="payment_method"
-                  value={form.payment_method}
-                  onChange={handleChange}
-                  className="w-full mt-1 border rounded-lg px-4 py-3"
-                >
-                  <option value="bank">Bank Transfer</option>
-                  <option value="upi">UPI</option>
-                </select>
-              </div>
-
-              {form.payment_method === "bank" && (
-                <>
-                  <Input label="Account Name" name="account_name" value={form.account_name} onChange={handleChange}/>
-                  <Input label="Account Number" name="account_number" value={form.account_number} onChange={handleChange}/>
-                  <Input label="Bank Name" name="bank_name" value={form.bank_name} onChange={handleChange}/>
-                  <Input label="IFSC Code" name="ifsc_code" value={form.ifsc_code} onChange={handleChange}/>
-                </>
-              )}
-
-              {form.payment_method === "upi" && (
-                <>
-                  <Input label="UPI Name" name="upi_name" value={form.upi_name} onChange={handleChange}/>
-                  <Input label="UPI ID" name="upi_id" value={form.upi_id} onChange={handleChange}/>
-                </>
-              )}
-
-              <Input
-                label="Withdraw Amount"
-                type="number"
-                name="withdraw_amount"
-                value={form.withdraw_amount}
-                onChange={handleChange}
-              />
-
-            </div>
-
-            <div className="flex justify-end gap-3 p-5 border-t">
-
-              <button
-                onClick={() => setShowModal(false)}
-                className="px-5 py-2 rounded-lg bg-gray-200"
-              >
-                Cancel
-              </button>
-
-              <button
-                onClick={handleSubmit}
-                disabled={loading}
-                className="px-6 py-2 rounded-lg bg-[#5d45fd] text-white disabled:opacity-50"
-              >
-                {loading ? "Submitting..." : "Submit"}
-              </button>
-
-            </div>
-
-          </div>
-        </div>
-      )}
     </div>
   );
 };
@@ -349,7 +294,7 @@ const Input = ({ label, ...props }) => (
     <label className="text-sm font-medium">{label}</label>
     <input
       {...props}
-      className="w-full mt-1 border rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#5d45fd]"
+      className="w-full mt-1 border rounded-lg px-4 py-3"
     />
   </div>
 );

@@ -100,7 +100,10 @@ export default function Courses() {
 
                           {item.referral_commission > 0 && (
                             <span className="bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-1 rounded-full">
-                              Refer & Earn ₹{item.referral_commission}
+                              Refer & Earn ₹
+                              {Math.round(
+                                ((item.discount_price || item.price) * item.referral_commission) / 100
+                              )}
                             </span>
                           )}
                         </div>

@@ -11,7 +11,7 @@ export const api = axios.create({
 });
 
 // export const host = "http://localhost:5555";
-export const host = "https://demo3.daltincasino.live/";
+export const host = "https://maxifyacademy.com/";
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("accessToken"); 

@@ -15,9 +15,8 @@ const Register = () => {
     (state) => state.auth
   );
 
-  const refFromURL = searchParams.get("ref") || "";
-
   /* ================= FORM STATE ================= */
+
   const [formData, setFormData] = useState({
     firstname: "",
     lastname: "",
@@ -27,7 +26,7 @@ const Register = () => {
     password: "",
     password_confirmation: "",
     agree: false,
-    referral_code: refFromURL,
+    referral_code: "",
   });
 
   const [showPassword, setShowPassword] = useState({
@@ -41,7 +40,26 @@ const Register = () => {
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [toast, setToast] = useState("");
 
+  /* ================= GET REF + COURSE ================= */
+
+  useEffect(() => {
+    const ref = searchParams.get("ref");
+    const course = searchParams.get("course");
+
+    if (course) {
+      localStorage.setItem("referral_course", course);
+    }
+
+    if (ref) {
+      setFormData((prev) => ({
+        ...prev,
+        referral_code: ref,
+      }));
+    }
+  }, [searchParams]);
+
   /* ================= OTP EFFECT ================= */
+
   useEffect(() => {
     if (otpSent) {
       setToast("OTP sent to your email");
@@ -57,18 +75,22 @@ const Register = () => {
   }, [toast]);
 
   /* ================= PASSWORD VALIDATION ================= */
+
   const getPasswordError = () => {
     const p = formData.password;
+
     if (p.length < 8) return "Password must be at least 8 characters";
     if (!/[A-Z]/.test(p)) return "Add at least 1 uppercase letter";
     if (!/[a-z]/.test(p)) return "Add at least 1 lowercase letter";
     if (!/[0-9]/.test(p)) return "Add at least 1 number";
     if (!/[^A-Za-z0-9]/.test(p))
       return "Add at least 1 special character";
+
     return "";
   };
 
   /* ================= HANDLE CHANGE ================= */
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
@@ -87,6 +109,7 @@ const Register = () => {
   };
 
   /* ================= VALIDATION ================= */
+
   const validateForm = () => {
     const newErrors = {};
 
@@ -116,12 +139,15 @@ const Register = () => {
       newErrors.agree = "Please accept terms & conditions";
 
     setErrors(newErrors);
+
     return Object.keys(newErrors).length === 0;
   };
 
-  /* ================= SUBMIT ================= */
+  /* ================= REGISTER ================= */
+
   const handleSubmit = (e) => {
     e.preventDefault();
+
     if (!validateForm()) return;
 
     dispatch(
@@ -139,17 +165,31 @@ const Register = () => {
   };
 
   /* ================= OTP VERIFY ================= */
+
   const verifyOtpFromBackend = () => {
     if (otp.length !== 6) {
       setOtpError("Enter valid 6-digit OTP");
       return;
     }
+
     setOtpError("");
+
     dispatch(verifyOTP(otp));
   };
 
+  /* ================= REDIRECT AFTER VERIFY ================= */
+
   useEffect(() => {
-    if (otpVerified) navigate("/");
+    if (otpVerified) {
+      const course = localStorage.getItem("referral_course");
+
+      if (course) {
+        navigate(`/course-info/${course}`);
+        localStorage.removeItem("referral_course");
+      } else {
+        navigate("/");
+      }
+    }
   }, [otpVerified, navigate]);
 
   /* ================= UI ================= */
