@@ -3,9 +3,20 @@ const mongoose = require("mongoose");
 const courseSchema = new mongoose.Schema(
   {
     /* ================= IMAGE ================= */
+    media_type: {
+      type: String,
+      enum: ["image", "video"],
+      default: "image"
+    },
+
     image: {
       type: String,
-      required: true,
+      default: null
+    },
+
+    video_url: {
+      type: String,
+      default: null
     },
 
     /* ================= TITLE ================= */

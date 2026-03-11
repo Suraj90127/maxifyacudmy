@@ -20,6 +20,8 @@ import {
   FaLinkedinIn,
   FaPinterestP
 } from "react-icons/fa";
+import Hls from "hls.js";
+import { useRef } from "react";
 
 import { useParams, useNavigate } from "react-router-dom";
 import UserLayout from "../../Layouts/UserLayout";
@@ -144,6 +146,11 @@ const CourseDetail = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const videoRef = useRef(null);
+  const hlsRef = useRef(null);
+
+  const LIB_ID = "548872";
+
   const { singleCourse: course, courseContent, loading } = useSelector((state) => state.courses);
   const { reviews } = useSelector((state) => state.courseReview);
   const { user } = useSelector((state) => state.auth);
@@ -189,6 +196,62 @@ const CourseDetail = () => {
     });
   };
 
+  const getHlsUrl = (src) => {
+    if (!src) return "";
+
+    if (src.includes(".m3u8")) return src;
+
+    if (src.includes("b-cdn.net")) {
+      const parts = src.split("/");
+      const domain = parts[2];
+      const guid = parts[3];
+
+      return `https://${domain}/${guid}/playlist.m3u8`;
+    }
+
+    return `https://vz-${LIB_ID}.b-cdn.net/${src}/playlist.m3u8`;
+  };
+
+
+  const [previewVideo, setPreviewVideo] = useState(null);
+
+  useEffect(() => {
+    if (courseContent?.length) {
+      const firstVideo = courseContent[0]?.videos?.[0];
+      if (firstVideo) {
+        setPreviewVideo(firstVideo);
+      }
+    }
+  }, [courseContent]);
+
+  useEffect(() => {
+    if (!course?.video_url || !videoRef.current) return;
+
+    const video = videoRef.current;
+
+    if (hlsRef.current) {
+      hlsRef.current.destroy();
+    }
+
+    const hlsUrl = getHlsUrl(course.video_url);
+
+    if (Hls.isSupported()) {
+      const hls = new Hls();
+
+      hls.loadSource(hlsUrl);
+      hls.attachMedia(video);
+
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        video.play().catch(() => { });
+      });
+
+      hlsRef.current = hls;
+    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+      video.src = hlsUrl;
+      video.play().catch(() => { });
+    }
+
+  }, [course?.video_url]);
   if (loading || !course) return <div className="text-center py-20 font-bold">Loading Course...</div>;
 
   // ⭐ PRICE FIX LOGIC
@@ -394,10 +457,27 @@ const CourseDetail = () => {
 
             <div className="w-full lg:w-1/3 order-1 lg:order-2">
               <div className="lg:sticky lg:top-24 border border-gray-100 rounded-2xl shadow-xl bg-white overflow-hidden">
-                <div className="relative aspect-video lg:aspect-auto">
-                  <img src={course.image} alt={course.title} className="w-full h-full lg:h-64 object-cover" />
-                </div>
-                <div className="p-6">
+                <div className="relative aspect-video lg:aspect-auto bg-black">
+                  {course?.video_url ? (
+                    <video
+                      ref={videoRef}
+                      className="w-full h-full lg:h-64 object-cover"
+                      controls
+                      autoPlay
+                      muted
+                      playsInline
+                      preload="auto"
+                      controlsList="nodownload noplaybackrate"
+                      disablePictureInPicture
+                    />
+                  ) : (
+                    <img
+                      src={course.image}
+                      alt={course.title}
+                      className="w-full h-full lg:h-64 object-cover"
+                    />
+                  )}
+                </div>                <div className="p-6">
                   <div className="flex items-center gap-3 mb-6 flex-wrap">
                     {isFreeCourse ? (
                       <span className="text-2xl font-black text-green-600 uppercase">
