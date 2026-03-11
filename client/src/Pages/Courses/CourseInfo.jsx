@@ -634,7 +634,8 @@ const CourseDetail = () => {
                   </div>
                 </div>
               </div>
-              <h1 className="text-2xl sm:text-4xl font-black mb-4 leading-tight">{course.title}</h1>
+
+              <h1 className="text-2xl sm:text-4xl mt-6 md:mt-0 font-black mb-4 leading-tight">{course.title}</h1>
               <p className="text-gray-500 text-lg mb-8 leading-relaxed">{course.short_description}</p>
 
               <div className="bg-gray-50 rounded-2xl p-6 sm:p-8 mb-10 border border-gray-100">
