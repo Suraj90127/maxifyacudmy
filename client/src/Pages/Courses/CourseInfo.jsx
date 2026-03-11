@@ -441,7 +441,6 @@ const CourseDetail = () => {
     }
   };
 
-  console.log(course?.learns)
   const learnPoints = Array.isArray(course?.learns)
     ? course.learns
     : typeof course?.learns === "string"
@@ -454,30 +453,17 @@ const CourseDetail = () => {
       <div className="min-h-screen bg-white font-sans text-[#1c1d1f]">
         <div className="mx-auto px-4 sm:px-6 py-6 lg:py-12 max-w-7xl">
           <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-
-            <div className="w-full lg:w-1/3 order-1 lg:order-2">
+            {/* Right CONTENT */}
+            <div className="w-full lg:w-1/3 order-1 lg:order-2 hidden md:block">
               <div className="lg:sticky lg:top-24 border border-gray-100 rounded-2xl shadow-xl bg-white overflow-hidden">
-                <div className="relative aspect-video lg:aspect-auto bg-black">
-                  {course?.video_url ? (
-                    <video
-                      ref={videoRef}
-                      className="w-full h-full lg:h-64 object-cover"
-                      controls
-                      autoPlay
-                      muted
-                      playsInline
-                      preload="auto"
-                      controlsList="nodownload noplaybackrate"
-                      disablePictureInPicture
-                    />
-                  ) : (
-                    <img
-                      src={course.image}
-                      alt={course.title}
-                      className="w-full h-full lg:h-64 object-cover"
-                    />
-                  )}
-                </div>                <div className="p-6">
+                <div className="relative w-full aspect-video bg-gray-100 rounded-xl overflow-hidden">
+                  <img
+                    src={course.image}
+                    alt={course.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="p-6">
                   <div className="flex items-center gap-3 mb-6 flex-wrap">
                     {isFreeCourse ? (
                       <span className="text-2xl font-black text-green-600 uppercase">
@@ -555,7 +541,99 @@ const CourseDetail = () => {
             </div>
 
             {/* MAIN CONTENT */}
-            <div className="w-full lg:w-2/3 order-2 lg:order-1">
+            <div className="w-full lg:w-2/3 order-2 lg:order-1 ">
+              <div className="relative aspect-video   ">
+                <video
+                  ref={videoRef}
+                  className="w-full h-full md:rounded-2xl rounded-t-2xl  object-cover"
+                  controls
+                  autoPlay
+                  muted
+                  playsInline
+                  preload="auto"
+                  controlsList="nodownload noplaybackrate"
+                  disablePictureInPicture
+                />
+              </div>
+
+              <div className="w-full lg:w-1/3 md:hidden order-1 lg:order-2">
+                <div className="lg:sticky lg:top-24 border border-gray-100 rounded-b-2xl shadow-xl bg-white overflow-hidden">
+                  <div className="p-6">
+                    <div className="flex items-center gap-3 mb-6 flex-wrap">
+                      {isFreeCourse ? (
+                        <span className="text-2xl font-black text-green-600 uppercase">
+                          FREE
+                        </span>
+                      ) : (
+                        <>
+                          {hasDiscount && (
+                            <span className="line-through text-gray-400 text-lg">
+                              ₹{course.price}
+                            </span>
+                          )}
+                          <h2 className="text-3xl font-black text-gray-900">
+                            ₹{finalAmount}
+                          </h2>
+                        </>
+                      )}
+                      <div className="ml-auto flex gap-4 text-xs font-bold text-gray-500">
+                        {/* <button className="flex items-center gap-1 text-cyan-500"><FaTags/> Promo</button> */}
+                        <button onClick={() => setShowShareModal(true)} className="flex items-center gap-1"><FaRegShareSquare /> Share</button>
+                      </div>
+                    </div>
+                    {/* ⭐ BUTTON LOGIC ⭐ */}
+                    {course.price === 0 || course.is_premium === false ? (
+                      // ✅ FREE COURSE
+                      isEnrolled ? (
+                        <button
+                          onClick={() => navigate(`/course-content/${course._id}`)}
+                          className="w-full bg-cyan-500 hover:bg-cyan-600 text-white py-4 rounded-xl font-black text-lg transition-all uppercase shadow-lg shadow-cyan-100"
+                        >
+                          Continue Learning
+                        </button>
+                      ) : (
+                        <button
+                          onClick={handleEnrollCourse}
+                          className="w-full bg-cyan-500 hover:bg-cyan-600 text-white py-4 rounded-xl font-black text-lg transition-all uppercase shadow-lg shadow-cyan-100"
+                        >
+                          Enroll Now (Free)
+                        </button>
+                      )
+                    ) : isEnrolled ? (
+                      // ✅ PAID COURSE → ALREADY ENROLLED
+                      <button
+                        onClick={() => navigate(`/course-content/${course._id}`)}
+                        className="w-full bg-cyan-500 hover:bg-cyan-600 text-white py-4 rounded-xl font-black text-lg transition-all uppercase shadow-lg shadow-cyan-100"
+                      >
+                        Continue Learning
+                      </button>
+                    ) : isBought ? (
+                      // ✅ PAID COURSE → BOUGHT BUT NOT ENROLLED
+                      <button
+                        onClick={handleEnrollCourse}
+                        className="w-full bg-cyan-500 hover:bg-cyan-600 text-white py-4 rounded-xl font-black text-lg transition-all uppercase shadow-lg shadow-cyan-100"
+                      >
+                        Enroll Now
+                      </button>
+                    ) : (
+                      // ❌ PAID COURSE → NOT BOUGHT
+                      <button
+                        onClick={handleBuyCourse}
+                        className="w-full bg-cyan-500 hover:bg-cyan-600 text-white py-4 rounded-xl font-black text-lg transition-all uppercase shadow-lg shadow-cyan-100"
+                      >
+                        Buy Now ₹{finalAmount}
+                      </button>
+                    )}
+                    <div className="mt-8 space-y-4">
+                      <h5 className="font-bold text-sm uppercase tracking-widest text-gray-400">Includes:</h5>
+                      <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 text-sm font-bold text-gray-600">
+
+                        {course?.includes?.map((p, i) => <li key={i} className="flex items-start gap-3"><FaCheck className="text-green-500 mt-1" /> {p.text}</li>)}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
               <h1 className="text-2xl sm:text-4xl font-black mb-4 leading-tight">{course.title}</h1>
               <p className="text-gray-500 text-lg mb-8 leading-relaxed">{course.short_description}</p>
 
