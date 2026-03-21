@@ -96,30 +96,42 @@ exports.verifyOTP = async (req, res) => {
   try {
     const { otp } = req.body;
 
+    /* ================= FIND TEMP USER ================= */
     const tempUser = await TempUser.findOne({ otp });
-    if (!tempUser)
+
+    if (!tempUser) {
       return res.status(400).json({ message: "Invalid OTP." });
+    }
 
-    if (Date.now() > tempUser.otp_expires)
+    if (Date.now() > tempUser.otp_expires) {
       return res.status(400).json({ message: "OTP expired." });
+    }
 
+    /* ================= HASH PASSWORD ================= */
     const hashedPassword = await bcrypt.hash(tempUser.password, 10);
 
-    // 🔥 NUMERIC REFERRAL CODE
+    /* ================= GENERATE REFERRAL ================= */
     const myReferralCode = await generateNumericReferralCode();
 
-    const FRONTEND = process.env.FRONTEND_URL || "http://localhost:5173";
-    const referralLink = `${FRONTEND}/register?ref=${myReferralCode}`;
+    const FRONTEND =
+      process.env.FRONTEND_URL || "http://localhost:5173";
 
+    // ✅ FINAL REFERRAL LINK (CORRECT FLOW)
+    const referralLink = `${FRONTEND}?ref=${myReferralCode}`;
+
+    /* ================= CREATE USER ================= */
     const user = await User.create({
       firstname: tempUser.firstname,
       lastname: tempUser.lastname,
       email: tempUser.email,
       mobile: tempUser.mobile,
       password: hashedPassword,
+
       referral_code: myReferralCode,
       referral_link: referralLink,
-      ref_by: tempUser.referral_code,
+
+      ref_by: tempUser.referral_code || null, // ✅ safe
+
       credit: 0,
       referrals_count: 0,
       role: "user",
@@ -127,20 +139,25 @@ exports.verifyOTP = async (req, res) => {
       i_agree: true,
     });
 
-    // Referral credit
-
+    /* ================= CLEAN TEMP USER ================= */
     await TempUser.deleteOne({ email: tempUser.email });
 
-    // AUTO LOGIN
-    const token = createToken({ id: user._id, role: user.role });
+    /* ================= AUTO LOGIN ================= */
+    const token = createToken({
+      id: user._id,
+      role: user.role,
+    });
+
     res.cookie("token", token, {
       httpOnly: true,
       sameSite: "strict",
-      secure: false, // true in production (HTTPS)
+      secure: false, // 🔥 production me true karna
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
+    /* ================= RESPONSE ================= */
     return res.status(201).json({
+      success: true,
       message: "OTP verified & logged in successfully",
       user: {
         _id: user._id,
@@ -148,11 +165,17 @@ exports.verifyOTP = async (req, res) => {
         lastname: user.lastname,
         email: user.email,
         role: user.role,
+        referral_code: user.referral_code,
+        ref_by: user.ref_by, // 👈 admin ke liye useful
       },
       token,
     });
+
   } catch (err) {
-    return res.status(500).json({ message: err.message });
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
   }
 };
 

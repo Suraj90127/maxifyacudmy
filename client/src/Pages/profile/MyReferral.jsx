@@ -31,9 +31,14 @@ export const MyReferral = () => {
 
   const generateCourseReferral = (slug) => {
     if (!referralLink) return "";
-    return `${referralLink}&course=${slug}`;
-  };
 
+    // ensure proper format
+    if (referralLink.includes("?")) {
+      return `${referralLink}&course=${slug}`;
+    } else {
+      return `${referralLink}?course=${slug}`;
+    }
+  };
   return (
     <div className="min-h-screen bg-gray-100 p-4 md:p-8">
 

@@ -225,6 +225,16 @@ const CourseDetail = () => {
   }, [courseContent]);
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get("ref");
+
+    if (ref) {
+      localStorage.setItem("referralCode", ref);
+    }
+  }, []);
+
+
+  useEffect(() => {
     if (!course?.video_url || !videoRef.current) return;
 
     const video = videoRef.current;
@@ -275,11 +285,24 @@ const CourseDetail = () => {
     setExpandedSections(updated);
   };
 
+
   const handleBuyCourse = async () => {
-    if (!user) {
-      toast.error("Please log in first.");
-      return navigate("/login");
+    const token = localStorage.getItem("token");
+    const referralCode = localStorage.getItem("referralCode");
+
+    /* ================= REFERRAL FLOW ================= */
+
+    if (!token) {
+      if (referralCode) {
+        // 👉 referral hai → register
+        return navigate(`/register?ref=${referralCode}&course=${course._id}`);
+      } else {
+        // 👉 no referral → login
+        return navigate(`/login?course=${course._id}`);
+      }
     }
+
+    /* ================= USER LOGIN HAI → PAYMENT ================= */
 
     try {
       /* ================= CREATE ORDER ================= */
@@ -319,7 +342,6 @@ const CourseDetail = () => {
               })
             );
 
-            /* ❌ VERIFY FAIL */
             if (!verifyRes.payload?.success) {
               dispatch(
                 saveFailedPayment({
@@ -351,6 +373,9 @@ const CourseDetail = () => {
             if (!createPurchase.fulfilled.match(purchaseRes)) {
               throw new Error("Purchase failed");
             }
+
+            /* 🔥 CLEAR REFERRAL AFTER SUCCESS */
+            localStorage.removeItem("referralCode");
 
             window.location.reload();
           } catch (err) {
@@ -387,10 +412,8 @@ const CourseDetail = () => {
         theme: { color: "#06b6d4" },
       };
 
-      /* ================= RAZORPAY INSTANCE ================= */
       const rzp = new window.Razorpay(options);
 
-      /* ❌ PAYMENT FAILED EVENT */
       rzp.on("payment.failed", (response) => {
         dispatch(
           saveFailedPayment({

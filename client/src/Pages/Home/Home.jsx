@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { FaStar, FaArrowRight, FaUsers, FaComments, FaDownload, FaBriefcase, FaGraduationCap, FaChalkboardTeacher, FaClipboardCheck, FaBookOpen } from 'react-icons/fa';
-import { MdOutlinePlayCircle } from 'react-icons/md';
+import { FaStar } from 'react-icons/fa';
+import { useNavigate } from "react-router-dom";
+
 import HeroSection from './components/HeroSection';
 import HomeAbout from './components/HomeAbout';
 import FeaturesSection from './components/FeaturedHome';
@@ -16,17 +17,33 @@ import Blog from './components/Blog';
 
 const Home = () => {
 
-  useEffect(() => {
-    window.scroll(0, 0)
-  })
-
+  const navigate = useNavigate();
   const [colorWords, setColorWords] = useState([]);
 
+  /* ================= SCROLL FIX ================= */
   useEffect(() => {
-    // Any initialization for dynamic elements
+    window.scrollTo(0, 0);
   }, []);
 
-  // Helper component to render stars
+  /* ================= REFERRAL + COURSE REDIRECT ================= */
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    const ref = params.get("ref");
+    const course = params.get("course");
+
+    // ✅ Save referral
+    if (ref) {
+      localStorage.setItem("referralCode", ref);
+    }
+
+    // 🔥 Redirect to course page
+    if (course) {
+      navigate(`/course-info/${course}`);
+    }
+  }, [navigate]);
+
+  /* ================= STAR RATING ================= */
   const StarRating = ({ rating }) => {
     const stars = [];
     const totalStars = 5;
@@ -35,7 +52,9 @@ const Home = () => {
       stars.push(
         <FaStar
           key={i}
-          className={`w-5 h-5 ${i <= rating ? 'text-yellow-400' : 'text-gray-300'}`}
+          className={`w-5 h-5 ${
+            i <= rating ? 'text-yellow-400' : 'text-gray-300'
+          }`}
         />
       );
     }
@@ -43,15 +62,10 @@ const Home = () => {
   };
 
   return (
-
     <UserLayout>
-
-
-
-      <main className="main-wrapper overflow-x-hidden  ">
+      <main className="main-wrapper overflow-x-hidden">
 
         <HeroSection />
-
         <HomeAbout />
         <CourseCategories />
         <FeaturesSection />
@@ -62,6 +76,7 @@ const Home = () => {
         <TestimonialSection />
         <Blog />
         <CallToActionSection />
+
       </main>
     </UserLayout>
   );
