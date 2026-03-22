@@ -24,6 +24,7 @@ const subscriptionRoutes = require("./routes/subscriptionRoutes");
 const withdrawalRoutes = require("./routes/withdrawalRoutes");
 const socialLinksRoutes = require("./routes/socialLinksRoutes");
 const courseProgressRoutes = require("./routes/courseProgressRoutes");
+const trackVisitor = require("./controller/trackVisitor");
 
 
 const app = express();
@@ -36,12 +37,16 @@ app.use(express.json({ limit: "100mb" }));
 app.use(express.urlencoded({ extended: true, limit: "100mb" }));
 app.use(cookieParser());
 
+
 app.use(
   cors({
     origin: ["http://localhost:5173", "http://localhost:5174"],
     credentials: true,
   })
 );
+
+app.use(trackVisitor);
+
 
 /* ================= STATIC UPLOADS ================= */
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
