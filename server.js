@@ -83,16 +83,25 @@ app.get("/r", async (req, res) => {
       req.headers["x-forwarded-for"]?.split(",")[0] ||
       req.socket.remoteAddress;
 
-    await Visitor.create({
-      ip,
-      device: result.device.type || "Desktop",
-      os: result.os.name,
-      browser: result.browser.name,
-      ref,
-      course,
-    });
+    // 🔥 find and update OR create
+    await Visitor.findOneAndUpdate(
+      { ip, ref, course }, // condition
+      {
+        $inc: { count: 1 }, // count +1
+        $set: {
+          device: result.device.type || "Desktop",
+          os: result.os.name,
+          browser: result.browser.name,
+          date: new Date(),
+        },
+      },
+      {
+        upsert: true, // create if not exists
+        new: true,
+      }
+    );
 
-    // 🔁 redirect to real link
+    // 🔁 redirect
     res.redirect(
       `https://maxifyacademy.com/?ref=${ref}&course=${course}`
     );

@@ -7,6 +7,10 @@ const visitorSchema = new mongoose.Schema({
   browser: String,
   ref: String,
   course: String,
+  count: {
+    type: Number,
+    default: 1
+  },
   date: {
     type: Date,
     default: Date.now,
