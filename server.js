@@ -24,7 +24,8 @@ const subscriptionRoutes = require("./routes/subscriptionRoutes");
 const withdrawalRoutes = require("./routes/withdrawalRoutes");
 const socialLinksRoutes = require("./routes/socialLinksRoutes");
 const courseProgressRoutes = require("./routes/courseProgressRoutes");
-const trackVisitor = require("./controller/trackVisitor");
+const Visitor = require("./models/Visitor");
+const UAParser = require("ua-parser-js");
 
 
 const app = express();
@@ -45,7 +46,6 @@ app.use(
   })
 );
 
-app.use(trackVisitor);
 
 
 /* ================= STATIC UPLOADS ================= */
@@ -68,8 +68,40 @@ app.use("/api/subscription", subscriptionRoutes);
 app.use("/api/social-links", socialLinksRoutes);
 app.use("/api/progress", courseProgressRoutes);
 app.use("/api/withdrawal", withdrawalRoutes);
-app.use('/api/amount',require('./routes/amountRoute'))
+app.use('/api/amount', require('./routes/amountRoute'))
 app.use("/api/certificate", require("./routes/certificateRoutes"));
+
+
+app.get("/r", async (req, res) => {
+  try {
+    const { ref, course } = req.query;
+
+    const parser = new UAParser(req.headers["user-agent"]);
+    const result = parser.getResult();
+
+    const ip =
+      req.headers["x-forwarded-for"]?.split(",")[0] ||
+      req.socket.remoteAddress;
+
+    await Visitor.create({
+      ip,
+      device: result.device.type || "Desktop",
+      os: result.os.name,
+      browser: result.browser.name,
+      ref,
+      course,
+    });
+
+    // 🔁 redirect to real link
+    res.redirect(
+      `https://maxifyacademy.com/?ref=${ref}&course=${course}`
+    );
+
+  } catch (err) {
+    console.log(err.message);
+    res.redirect("https://maxifyacademy.com");
+  }
+});
 
 
 

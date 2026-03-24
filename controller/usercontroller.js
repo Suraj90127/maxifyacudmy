@@ -117,7 +117,7 @@ exports.verifyOTP = async (req, res) => {
       process.env.FRONTEND_URL || "http://localhost:5173";
 
     // ✅ FINAL REFERRAL LINK (CORRECT FLOW)
-    const referralLink = `${FRONTEND}?ref=${myReferralCode}`;
+    const referralLink = `${FRONTEND}/r?ref=${myReferralCode}`;
 
     /* ================= CREATE USER ================= */
     const user = await User.create({
