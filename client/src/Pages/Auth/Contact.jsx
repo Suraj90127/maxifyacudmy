@@ -426,8 +426,8 @@ const ContactPage = () => {
                   </div>
                   <div>
                     <h5 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-1">Call Support</h5>
-                    <a href="tel:+917033976030" className="text-xl font-black text-gray-900 hover:text-cyan-500 transition-colors">
-                      +91 8106716674
+                    <a href="tel:+919310328928" className="text-xl font-black text-gray-900 hover:text-cyan-500 transition-colors">
+                      +91 9310328928
                     </a>
                   </div>
                 </div>

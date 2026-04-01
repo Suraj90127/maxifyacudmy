@@ -32,34 +32,57 @@ const ShippingPolicy = () => {
 
             <hr className="mb-4" />
 
+            {/* Content Starts */}
             <p className="text-lg leading-relaxed text-gray-800 mb-4">
-              For International buyers, orders are shipped and delivered through
-              registered international courier companies and/or International
-              speed post only. For domestic buyers, orders are shipped through
-              registered domestic courier companies and/or speed post only.
+              For international buyers, purchases are processed online and access is delivered digitally. 
+              No physical shipping is involved.
             </p>
 
             <p className="text-lg leading-relaxed text-gray-800 mb-4">
-              Orders are shipped within <strong>Not Applicable</strong> or as per
-              the delivery date agreed at the time of order confirmation and delivering 
-              of the shipment subject to courier company/post office norms. Maxify Academy 
-              is not liable for any delay in delivery by the courier company/post authorities.
+              For domestic buyers, course access is also delivered digitally without any physical shipment.
             </p>
 
             <p className="text-lg leading-relaxed text-gray-800 mb-4">
-              Delivery of all orders will be to the address provided by the buyer.
-              Delivery of services will be confirmed on your registered email ID.
+              Once the payment is successfully completed:
+            </p>
+
+            <ul className="list-disc pl-6 text-lg text-gray-800 mb-4 space-y-2">
+              <li>
+                If you purchase through our landing page, your login ID & password 
+                will be sent to your registered email ID.
+              </li>
+              <li>
+                If you purchase directly from our website, the course will be automatically 
+                available in your account dashboard instantly after payment.
+              </li>
+            </ul>
+
+            <p className="text-lg leading-relaxed text-gray-800 mb-4">
+              All course deliveries are typically instant. However, in rare cases, it may take 
+              a few minutes due to server or payment gateway processing.
+            </p>
+
+            <p className="text-lg leading-relaxed text-gray-800 mb-4">
+              Maxify Academy is not responsible for delays caused by payment gateway issues, 
+              email delivery delays, or technical errors beyond our control.
+            </p>
+
+            <p className="text-lg leading-relaxed text-gray-800 mb-4">
+              Access to the course will be provided only to the email ID used during purchase.
             </p>
 
             <p className="text-lg leading-relaxed text-gray-800">
-              For any issues in utilizing our services, you may contact our helpdesk at{" "}
-              <a href="tel:+917033976030" className="text-blue-600 hover:underline">
-                7033976030
-              </a>{" "}
-              or email{" "}
+              For any issues in accessing or utilizing the course, you can contact our support team:
+              <br />
+              📞{" "}
+              <a href="tel:9310328928" className="text-blue-600 hover:underline">
+                9310328928
+              </a>
+              <br />
+              📧{" "}
               <a href="mailto:support@maxifyacademy.com" className="text-blue-600 hover:underline">
                 support@maxifyacademy.com
-              </a>.
+              </a>
             </p>
 
           </div>

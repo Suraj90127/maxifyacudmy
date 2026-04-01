@@ -565,20 +565,21 @@ const CourseDetail = () => {
 
             {/* MAIN CONTENT */}
             <div className="w-full lg:w-2/3 order-2 lg:order-1 ">
-              <div className="relative aspect-video   ">
-                <video
-                  ref={videoRef}
-                  className="w-full h-full md:rounded-2xl rounded-t-2xl  object-cover"
-                  controls
-                  autoPlay
-                  muted
-                  playsInline
-                  preload="auto"
-                  controlsList="nodownload noplaybackrate"
-                  disablePictureInPicture
-                />
-              </div>
-
+              {course?.video_url && (
+                <div className="relative aspect-video">
+                  <video
+                    ref={videoRef}
+                    className="w-full h-full md:rounded-2xl rounded-t-2xl object-cover"
+                    controls
+                    autoPlay
+                    muted
+                    playsInline
+                    preload="auto"
+                    controlsList="nodownload noplaybackrate"
+                    disablePictureInPicture
+                  />
+                </div>
+              )}
               <div className="w-full lg:w-1/3 md:hidden order-1 lg:order-2">
                 <div className="lg:sticky lg:top-24 border border-gray-100 rounded-b-2xl shadow-xl bg-white overflow-hidden">
                   <div className="p-6">

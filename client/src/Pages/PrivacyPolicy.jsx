@@ -1,119 +1,153 @@
-import React from 'react';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import UserLayout from '../Layouts/UserLayout';
 
 const PrivacyPolicy = () => {
     useEffect(() => {
-        window.scroll(0, 0)
-    })
+        window.scroll(0, 0);
+    }, []);
+
     return (
         <UserLayout>
-            <div className="container mx-auto px-4  mb-10 ">
-                {/* Top Image */}
+            <div className="container mx-auto px-4 mb-10">
+
+                {/* Banner */}
                 <div className="text-center mb-8">
                     <img
                         src="https://i.ibb.co/gZ2HY4W1/Privacy-Policy.jpg"
                         alt="Privacy Policy Banner"
-                        className="w-full  mx-auto rounded-lg shadow-lg object-cover"
+                        className="w-full mx-auto rounded-lg shadow-lg object-cover"
                     />
                 </div>
 
                 <div className="bg-white rounded-xl shadow-md p-6 md:p-8 lg:p-10">
                     <div className="space-y-6">
+
+                        {/* INTRO */}
                         <p className="text-gray-700 leading-relaxed">
-                            This privacy policy sets out how Maxify Academy uses and protects any information that you give Maxify Academy when you visit their website and/or agree to purchase from them.
-                        </p>
-                        <p className="text-gray-700 leading-relaxed">
-                            Maxify Academy is committed to ensuring that your privacy is protected. Should we ask you to provide certain information by which you can be identified when using this website, and then you can be assured that it will only be used in accordance with this privacy statement.
-                        </p>
-                        <p className="text-gray-700 leading-relaxed">
-                            Maxify Academy may change this policy from time to time by updating this page. You should check this page from time to time to ensure that you adhere to these changes.
+                            This Privacy Policy outlines how Maxify Academy collects, uses, and protects any information 
+                            that you provide when you visit our website or purchase our digital courses.
                         </p>
 
-                        <div className="mt-8">
-                            <h4 className="text-xl font-semibold text-gray-800 mb-4">We may collect the following information:</h4>
+                        <p className="text-gray-700 leading-relaxed">
+                            Maxify Academy is committed to ensuring that your privacy is protected. Any information you 
+                            provide will only be used in accordance with this privacy policy.
+                        </p>
+
+                        <p className="text-gray-700 leading-relaxed">
+                            Maxify Academy may update this policy from time to time by modifying this page. 
+                            You are advised to review this page periodically to stay informed of any changes.
+                        </p>
+
+                        {/* INFORMATION */}
+                        <div>
+                            <h4 className="text-xl font-semibold text-gray-800 mb-3">
+                                📊 Information We Collect
+                            </h4>
+                            <p className="text-gray-700 mb-3">
+                                We may collect the following information:
+                            </p>
                             <ul className="list-disc pl-6 space-y-2 text-gray-700">
                                 <li>Name</li>
-                                <li>Contact information including email address</li>
-                                <li>Demographic information such as postcode, preferences and interests, if required</li>
-                                <li>Other information relevant to customer surveys and/or offers</li>
+                                <li>Contact information including email address and phone number</li>
+                                <li>Billing details (if required for payment processing)</li>
+                                <li>Preferences and interests related to our courses</li>
+                                <li>Other information relevant to customer feedback, surveys, or offers</li>
                             </ul>
                         </div>
 
-                        <div className="mt-8">
-                            <h4 className="text-xl font-semibold text-gray-800 mb-4">What we do with the information we gather</h4>
-                            <p className="text-gray-700 mb-4">We require this information to understand your needs and provide you with a better service, and in particular for the following reasons:</p>
+                        {/* USAGE */}
+                        <div>
+                            <h4 className="text-xl font-semibold text-gray-800 mb-3">
+                                ⚙️ How We Use Your Information
+                            </h4>
+                            <p className="text-gray-700 mb-3">
+                                We collect this information to better understand your needs and provide improved services:
+                            </p>
                             <ul className="list-disc pl-6 space-y-2 text-gray-700">
-                                <li>Internal record keeping.</li>
-                                <li>We may use the information to improve our products and services.</li>
-                                <li>We may periodically send promotional emails about new products, special offers or other information which we think you may find interesting using the email address which you have provided.</li>
-                                <li>
-                                    From time to time, we may also use your information to contact you for market research purposes. We may contact you by email, phone, fax or mail. We may use the information to customise the website according to your interests.
-                                </li>
+                                <li>Internal record keeping</li>
+                                <li>Providing access to purchased digital courses</li>
+                                <li>Sending login credentials (ID & Password) via email (for landing page purchases)</li>
+                                <li>Managing your account and course dashboard (for direct website purchases)</li>
+                                <li>Improving our products, services, and user experience</li>
+                                <li>Sending promotional emails, offers, or updates (only if opted-in)</li>
+                                <li>Conducting market research and customer feedback analysis</li>
                             </ul>
-                            <p className="text-gray-700 mt-4">
-                                We are committed to ensuring that your information is secure. In order to prevent unauthorised access or disclosure we have put in suitable measures.
-                            </p>
                         </div>
 
-                        <div className="mt-8">
-                            <h4 className="text-xl font-semibold text-gray-800 mb-4">How we use cookies</h4>
-                            <p className="text-gray-700 mb-4">
-                                A cookie is a small file which asks permission to be placed on your computer's hard drive. Once you agree, the file is added and the cookie helps analyze web traffic or lets you know when you visit a particular site. Cookies allow web applications to respond to you as an individual. The web application can tailor its operations to your needs, likes and dislikes by gathering and remembering information about your preferences.
-                            </p>
-                            <p className="text-gray-700 mb-4">
-                                We use traffic log cookies to identify which pages are being used. This helps us analyze data about webpage traffic and improve our website in order to tailor it to customer needs. We only use this information for statistical analysis purposes and then the data is removed from the system.
-                            </p>
-                            <p className="text-gray-700 mb-4">
-                                Overall, cookies help us provide you with a better website, by enabling us to monitor which pages you find useful and which you do not. A cookie in no way gives us access to your computer or any information about you, other than the data you choose to share with us.
-                            </p>
+                        {/* SECURITY */}
+                        <div>
+                            <h4 className="text-xl font-semibold text-gray-800 mb-3">
+                                🔐 Data Security
+                            </h4>
                             <p className="text-gray-700">
-                                You can choose to accept or decline cookies. Most web browsers automatically accept cookies, but you can usually modify your browser setting to decline cookies if you prefer. This may prevent you from taking full advantage of the website.
+                                We are committed to ensuring that your information is secure. We implement appropriate 
+                                technical and organizational measures to prevent unauthorized access, disclosure, or misuse 
+                                of your personal data.
                             </p>
                         </div>
 
-                        <div className="mt-8">
-                            <h4 className="text-xl font-semibold text-gray-800 mb-4">Controlling your personal information</h4>
-                            <p className="text-gray-700 mb-4">
-                                You may choose to restrict the collection or use of your personal information in the following ways:
+                        {/* COOKIES */}
+                        <div>
+                            <h4 className="text-xl font-semibold text-gray-800 mb-3">
+                                🍪 Cookies Policy
+                            </h4>
+                            <p className="text-gray-700 mb-3">
+                                A cookie is a small file placed on your device to enhance your browsing experience.
                             </p>
-                            <ul className="list-disc pl-6 space-y-2 text-gray-700 mb-6">
-                                <li>
-                                    Whenever you are asked to fill in a form on the website, look for the box that you can click to indicate that you do not want the information to be used by anybody for direct marketing purposes
-                                </li>
-                                <li>
-                                    If you have previously agreed to us using your personal information for direct marketing purposes, you may change your mind at any time by writing to or emailing us at
-                                    <a href="mailto:support@maxifyacademy.com" className="text-blue-600 hover:text-blue-800 ml-1">
+                            <p className="text-gray-700 mb-3">We use cookies to:</p>
+                            <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                                <li>Analyze website traffic and user behavior</li>
+                                <li>Improve website performance and user experience</li>
+                                <li>Customize content based on your preferences</li>
+                            </ul>
+                            <p className="text-gray-700 mt-3">
+                                You can choose to accept or decline cookies through your browser settings. However, 
+                                disabling cookies may affect some functionalities of the website.
+                            </p>
+                        </div>
+
+                        {/* CONTROL */}
+                        <div>
+                            <h4 className="text-xl font-semibold text-gray-800 mb-3">
+                                🎯 Controlling Your Personal Information
+                            </h4>
+                            <ul className="list-disc pl-6 space-y-2 text-gray-700 mb-3">
+                                <li>You may opt-out of receiving marketing communications at any time</li>
+                                <li>You can request modification or deletion of your personal data</li>
+                                <li>You may contact us if you believe any information we hold is incorrect</li>
+                            </ul>
+                            <p className="text-gray-700">
+                                We do not sell, distribute, or lease your personal information to third parties unless 
+                                required by law or with your explicit permission.
+                            </p>
+                        </div>
+
+                        {/* CONTACT */}
+                        <div>
+                            <h4 className="text-xl font-semibold text-gray-800 mb-3">
+                                📩 Contact & Support
+                            </h4>
+                            <p className="text-gray-700">
+                                If you have any questions regarding this Privacy Policy or your data, you can contact us:
+                            </p>
+
+                            <div className="mt-3 space-y-1 text-gray-800">
+                                <p>
+                                    📞{" "}
+                                    <a href="tel:9310328928" className="text-blue-600 hover:underline">
+                                        9310328928
+                                    </a>
+                                </p>
+                                <p>
+                                    📧{" "}
+                                    <a href="mailto:support@maxifyacademy.com" className="text-blue-600 hover:underline">
                                         support@maxifyacademy.com
                                     </a>
-                                </li>
-                            </ul>
-                            <p className="text-gray-700 mb-4">
-                                We will not sell, distribute or lease your personal information to third parties unless we have your permission or are required by law to do so. We may use your personal information to send you promotional information about third parties which we think you may find interesting if you tell us that you wish this to happen.
-                            </p>
-                            <p className="text-gray-700 text-sm sm:text-base leading-relaxed">
-                                If you believe that any information we are holding on you is incorrect or incomplete,
-                                please write to
-                                <span className="font-medium mx-1">Garhi Khaira, Jamui, Bihar 811317</span>,
-                                or contact us at
-                                <a
-                                    href="tel:7033976030"
-                                    className="text-blue-600 hover:text-blue-800 mx-1 break-all"
-                                >
-                                    7033976030
-                                </a>
-                                or
-                                <a
-                                    href="mailto:support@maxifyacademy.com"
-                                    className="text-blue-600 hover:text-blue-800 ml-1 break-all"
-                                >
-                                    support@maxifyacademy.com
-                                </a>
-                                <br/>
-                                as soon as possible. We will promptly correct any information found to be incorrect.
-                            </p>
-
+                                </p>
+                                <p>📍 Address: Noida sector 2, UP 201301</p>
+                            </div>
                         </div>
+
                     </div>
                 </div>
             </div>

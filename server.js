@@ -26,6 +26,11 @@ const socialLinksRoutes = require("./routes/socialLinksRoutes");
 const courseProgressRoutes = require("./routes/courseProgressRoutes");
 const Visitor = require("./models/Visitor");
 const UAParser = require("ua-parser-js");
+const dns = require("dns");
+// Change DNS
+dns.setServers(["1.1.1.1", "8.8.8.8"]);
+
+
 
 
 const app = express();
@@ -70,6 +75,7 @@ app.use("/api/progress", courseProgressRoutes);
 app.use("/api/withdrawal", withdrawalRoutes);
 app.use('/api/amount', require('./routes/amountRoute'))
 app.use("/api/certificate", require("./routes/certificateRoutes"));
+
 
 
 app.get("/r", async (req, res) => {
