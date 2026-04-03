@@ -245,9 +245,13 @@ exports.createPurchase = async (req, res) => {
         });
       }
 
+      // ✅ Generate referral code
       const referral_code = await generateNumericReferralCode();
 
+      // ✅ Generate referral link
+      const referral_link = `https://maxifyacademy.com/r?ref=${referral_code}`;
 
+      // ✅ Create user
       user = await User.create({
         firstname: tempUser.firstname,
         lastname: tempUser.lastname,
@@ -256,14 +260,17 @@ exports.createPurchase = async (req, res) => {
         password: tempUser.password,
         role: "user",
         referral_code,
+        referral_link, // 🔥 FIXED
         is_verified: true,
       });
 
-      await sendLoginCredentials(
+      // ✅ Send email (non-blocking best practice)
+      sendLoginCredentials(
         user.email,
         tempUser.plain_password
-      );
+      ).catch((err) => console.error("Email error:", err));
 
+      // ✅ Delete temp user
       await TempUser.deleteOne({ _id: tempUser._id });
     }
 
