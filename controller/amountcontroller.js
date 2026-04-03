@@ -16,12 +16,21 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
+const generateNumericReferralCode = async () => {
+  let code;
+  let exists = true;
+
+  while (exists) {
+    code = Math.floor(10000000 + Math.random() * 90000000).toString();
+    exists = await User.findOne({ referral_code: code });
+  }
+  return code;
+};
+
+
 const normalizeEmail = (email) =>
   email ? email.trim().toLowerCase() : null;
 
-/* ===================================================
-   1️⃣ CREATE ORDER (Temp User + Token)
-=================================================== */
 
 exports.createOrder = async (req, res) => {
   try {
@@ -236,6 +245,9 @@ exports.createPurchase = async (req, res) => {
         });
       }
 
+      const referral_code = await generateNumericReferralCode();
+
+
       user = await User.create({
         firstname: tempUser.firstname,
         lastname: tempUser.lastname,
@@ -243,6 +255,7 @@ exports.createPurchase = async (req, res) => {
         mobile: tempUser.mobile,
         password: tempUser.password,
         role: "user",
+        referral_code,
         is_verified: true,
       });
 
