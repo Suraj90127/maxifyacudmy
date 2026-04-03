@@ -51,7 +51,7 @@ app.use(
   })
 );
 
-
+app.set("trust proxy", true);
 
 /* ================= STATIC UPLOADS ================= */
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
@@ -75,6 +75,7 @@ app.use("/api/progress", courseProgressRoutes);
 app.use("/api/withdrawal", withdrawalRoutes);
 app.use('/api/amount', require('./routes/amountRoute'))
 app.use("/api/certificate", require("./routes/certificateRoutes"));
+app.use("/api/social-lead", require("./routes/socialLeadRoutes"))
 
 
 

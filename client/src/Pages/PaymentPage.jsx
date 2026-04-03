@@ -25,6 +25,7 @@ import {
   createPurchase,
   saveFailedPayment,
 } from "../redux/slices/amountSlice";
+import { createLead } from "../redux/slices/socialLeadSlice";
 
 const PaymentPage = () => {
   const { slug } = useParams();
@@ -63,7 +64,7 @@ const PaymentPage = () => {
 
 
   useEffect(() => {
-    if (!course) return; // 🔥 wait until course load
+    if (!course) return;
 
     const params = new URLSearchParams(window.location.search);
 
@@ -74,12 +75,20 @@ const PaymentPage = () => {
 
       sessionStorage.setItem("autoPayment", "true");
 
+      // ✅ UI fill
       setFormData({
         email,
         phone
       });
 
-      // 🔥 ab safe hai call karna
+      // 🔥 1. LEAD SAVE (backend pe IP auto capture hoga)
+      dispatch(createLead({
+        email,
+        phone,
+        page: window.location.href
+      }));
+
+      // 🔥 2. PAYMENT AUTO START
       setTimeout(() => {
         handleSubmit(
           { preventDefault: () => { } },
@@ -88,7 +97,7 @@ const PaymentPage = () => {
       }, 500);
     }
 
-  }, [course]); // 🔥 dependency add karo
+  }, [course]);
 
   /* ================= FETCH COURSE ================= */
   useEffect(() => {

@@ -20,6 +20,8 @@ import socialLinksReducer from "./slices/socialLinksSlice";
 import courseProgressReducer from "./slices/courseProgressSlice";
 import certificateReducer from "./slices/certificateSlice";
 import amountReducer from './slices/amountSlice'
+import leadReducer from "./slices/socialLeadSlice";
+
 
 const store = configureStore({
   reducer: {
@@ -41,6 +43,8 @@ const store = configureStore({
     courseProgress: courseProgressReducer,
     amount: amountReducer,
     certificate: certificateReducer,
+    lead: leadReducer,
+
 
 
 
