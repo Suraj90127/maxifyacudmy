@@ -37,6 +37,8 @@ const PaymentPage = () => {
     if (window.fbq) window.fbq("track", "PageView");
   }, [location.pathname]);
 
+
+
   /* ================= PREVENT BACK ================= */
   useEffect(() => {
     window.history.replaceState(null, "", window.location.href);
@@ -58,6 +60,27 @@ const PaymentPage = () => {
     email: user?.email || "",
     phone: user?.mobile ? String(user.mobile) : "",
   });
+
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    const email = params.get("email");
+    const phone = params.get("phone");
+
+    if (email && phone) {
+      setFormData({
+        email,
+        phone
+      });
+
+      // 🔥 auto submit trigger (delay zaroori hai)
+      setTimeout(() => {
+        const form = document.querySelector("form");
+        if (form) form.requestSubmit();
+      }, 500);
+    }
+  }, []);
 
   /* ================= FETCH COURSE ================= */
   useEffect(() => {
