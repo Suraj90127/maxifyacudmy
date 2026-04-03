@@ -63,24 +63,32 @@ const PaymentPage = () => {
 
 
   useEffect(() => {
+    if (!course) return; // 🔥 wait until course load
+
     const params = new URLSearchParams(window.location.search);
 
     const email = params.get("email");
     const phone = params.get("phone");
 
-    if (email && phone) {
+    if (email && phone && !sessionStorage.getItem("autoPayment")) {
+
+      sessionStorage.setItem("autoPayment", "true");
+
       setFormData({
         email,
         phone
       });
 
-      // 🔥 auto submit trigger (delay zaroori hai)
+      // 🔥 ab safe hai call karna
       setTimeout(() => {
-        const form = document.querySelector("form");
-        if (form) form.requestSubmit();
+        handleSubmit(
+          { preventDefault: () => { } },
+          { email, phone }
+        );
       }, 500);
     }
-  }, []);
+
+  }, [course]); // 🔥 dependency add karo
 
   /* ================= FETCH COURSE ================= */
   useEffect(() => {
@@ -115,22 +123,24 @@ const PaymentPage = () => {
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e, customData = null) => {
     e.preventDefault();
+
+    const data = customData || formData;
+
     if (!course || paymentLoading) return;
 
-    if (!formData.phone || formData.phone.length < 10) {
+    if (!data.phone || data.phone.length < 10) {
       alert("Enter valid mobile number");
       return;
     }
 
     try {
-      /* ================= CREATE ORDER ================= */
       const orderRes = await dispatch(
         createOrder({
           amount: finalPrice,
-          email: formData.email,
-          phone: Number(formData.phone),
+          email: data.email,
+          phone: Number(data.phone),
         })
       );
 
@@ -162,8 +172,8 @@ const PaymentPage = () => {
         order_id,
 
         prefill: {
-          email: formData.email,
-          contact: formData.phone,
+          email: data.email,
+          contact: data.phone,
         },
 
         /* ===== SUCCESS ===== */
@@ -190,7 +200,7 @@ const PaymentPage = () => {
                 is_buy: true,
                 purchased_amount: finalPrice,
                 coupon_amount: 0,
-                email: formData.email,
+                email: data.email,
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_signature: response.razorpay_signature,
@@ -209,8 +219,8 @@ const PaymentPage = () => {
               navigate("/payment-success", {
                 replace: true,
                 state: {
-                  email: formData.email,
-                  phone: formData.phone,
+                  email: data.email,
+                  phone: data.phone,
                   paymentId: response.razorpay_payment_id,
                   orderId: response.razorpay_order_id,
                   courseTitle: course.title,
@@ -237,8 +247,8 @@ const PaymentPage = () => {
             navigate("/payment-success", {
               replace: true,
               state: {
-                email: formData.email,
-                phone: formData.phone,
+                email: data.email,
+                phone: data.phone,
                 paymentId: response.razorpay_payment_id,
                 orderId: response.razorpay_order_id,
                 courseTitle: course.title,
