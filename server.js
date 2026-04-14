@@ -49,7 +49,7 @@ app.use(
     origin: [
       "http://localhost:5173",
       "http://localhost:5174",
-      "https://demo2.go-drop.in"
+      "https://socialmedia.maxifyacademy.com" // ✅ correct domain
     ],
     credentials: true,
   })
