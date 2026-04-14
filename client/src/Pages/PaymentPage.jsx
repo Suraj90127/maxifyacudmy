@@ -25,7 +25,6 @@ import {
   createPurchase,
   saveFailedPayment,
 } from "../redux/slices/amountSlice";
-import { createLead } from "../redux/slices/socialLeadSlice";
 
 const PaymentPage = () => {
   const { slug } = useParams();
@@ -81,12 +80,6 @@ const PaymentPage = () => {
         phone
       });
 
-      // 🔥 1. LEAD SAVE (backend pe IP auto capture hoga)
-      dispatch(createLead({
-        email,
-        phone,
-        page: window.location.href
-      }));
 
       // 🔥 2. PAYMENT AUTO START
       setTimeout(() => {

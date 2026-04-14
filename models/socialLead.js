@@ -7,6 +7,10 @@ const socialLeadSchema = new mongoose.Schema({
     lowercase: true,
     trim: true,
   },
+  name:{
+    type:String,
+    required:true
+  },
   phone: {
     type: String,
     required: true,

@@ -2,7 +2,7 @@ const SocialLead = require("../models/socialLead");
 
 const createSocialLead = async (req, res) => {
   try {
-    const { email, phone, page } = req.body;
+    const { name, email, phone, page } = req.body;
 
     if (!email || !phone) {
       return res.status(400).json({
@@ -18,6 +18,7 @@ const createSocialLead = async (req, res) => {
       req.ip;
 
     const lead = await SocialLead.create({
+      name,
       email,
       phone,
       page,
