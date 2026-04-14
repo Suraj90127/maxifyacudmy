@@ -78,8 +78,9 @@ exports.createOrder = async (req, res) => {
 
       res.cookie("token", token, {
         httpOnly: true,
-        sameSite: "strict",
-        secure: process.env.NODE_ENV === "production",
+        secure: true, // HTTPS required
+        sameSite: "None", // 🔥 MUST
+        domain: ".maxifyacademy.com", // 🔥 VERY IMPORTANT
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
     } else {

@@ -49,8 +49,7 @@ app.use(
     origin: [
       "http://localhost:5173",
       "http://localhost:5174",
-      "http://127.0.0.1:5500",
-      "https://demo2.go-drop.in" // ✅ add this
+      "https://demo2.go-drop.in"
     ],
     credentials: true,
   })
