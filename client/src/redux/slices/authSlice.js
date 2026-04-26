@@ -163,6 +163,7 @@ export const changePassword = createAsyncThunk(
 const initialState = {
   user: userData,
   loading: false,
+  isAuthLoading: false, // ✅ ADD THIS
   otpSent: false,
   otpVerified: false,
 };
@@ -241,17 +242,25 @@ const authSlice = createSlice({
       })
 
       // GET PROFILE
+      // GET PROFILE
+      .addCase(getProfile.pending, (state) => {
+        state.isAuthLoading = true;
+      })
       .addCase(getProfile.fulfilled, (state, action) => {
+        state.isAuthLoading = false;
         state.user = action.payload;
         localStorage.setItem("user", JSON.stringify(action.payload));
       })
-
+      .addCase(getProfile.rejected, (state) => {
+        state.isAuthLoading = false;
+        state.user = null;
+      })
       // COMPLETE PROFILE
       .addCase(completeProfile.fulfilled, (state, action) => {
         state.user = action.payload;
         localStorage.setItem("user", JSON.stringify(action.payload));
       });
-  },
+},
 });
 
 export const { resetOTPState } = authSlice.actions;

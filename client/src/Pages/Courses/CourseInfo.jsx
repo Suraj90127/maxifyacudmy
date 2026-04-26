@@ -51,6 +51,7 @@ import { saveFailedPayment } from "../../redux/slices/amountSlice";
 
 
 import { toast } from "react-toastify";
+import { getProfile } from "../../redux/slices/authSlice";
 
 /** * HELPER COMPONENTS **/
 const RatingStars = ({ rating }) => {
@@ -153,7 +154,7 @@ const CourseDetail = () => {
 
   const { singleCourse: course, courseContent, loading } = useSelector((state) => state.courses);
   const { reviews } = useSelector((state) => state.courseReview);
-  const { user } = useSelector((state) => state.auth);
+  const { user ,isAuthLoading} = useSelector((state) => state.auth);
   const { myPurchases } = useSelector((state) => state.purchase);
 
   const [expandedSections, setExpandedSections] = useState(new Set([0]));
@@ -170,6 +171,10 @@ const CourseDetail = () => {
     dispatch(getCourseContentByCourseId(id));
     dispatch(getPurchasesByUser());
     dispatch(getReviewByCourseId(id));
+    dispatch(getProfile());
+  }, [dispatch, id]);
+
+  useEffect(() => {
   }, [id, dispatch]);
 
   useEffect(() => {
@@ -286,22 +291,24 @@ const CourseDetail = () => {
   };
 
 
+
+
   const handleBuyCourse = async () => {
-    const token = localStorage.getItem("token");
     const referralCode = localStorage.getItem("referralCode");
 
     /* ================= REFERRAL FLOW ================= */
+    if (isAuthLoading) {
+      return toast.info("Please wait...");
+    }
 
-    if (!token) {
+    // ❌ only redirect if confirmed NOT logged in
+    if (!user) {
       if (referralCode) {
-        // 👉 referral hai → register
         return navigate(`/register?ref=${referralCode}&course=${course._id}`);
       } else {
-        // 👉 no referral → login
         return navigate(`/login?course=${course._id}`);
       }
     }
-
     /* ================= USER LOGIN HAI → PAYMENT ================= */
 
     try {
