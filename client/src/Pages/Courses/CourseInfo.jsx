@@ -285,7 +285,6 @@ const CourseDetail = () => {
     updated.has(id) ? updated.delete(id) : updated.add(id);
     setExpandedSections(updated);
   };
-  const { user } = useSelector((state) => state.auth);
 
   useEffect(() => {
     dispatch(getProfile()); // backend se user fetch karega (cookie auto send hogi)
