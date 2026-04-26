@@ -51,7 +51,6 @@ import { saveFailedPayment } from "../../redux/slices/amountSlice";
 
 
 import { toast } from "react-toastify";
-import { getProfile } from "../../redux/slices/authSlice";
 
 /** * HELPER COMPONENTS **/
 const RatingStars = ({ rating }) => {
@@ -286,21 +285,19 @@ const CourseDetail = () => {
     setExpandedSections(updated);
   };
 
-  useEffect(() => {
-    dispatch(getProfile()); // backend se user fetch karega (cookie auto send hogi)
-  }, []);
-
-
 
   const handleBuyCourse = async () => {
+    const token = localStorage.getItem("token");
     const referralCode = localStorage.getItem("referralCode");
 
     /* ================= REFERRAL FLOW ================= */
 
-    if (!user) {
+    if (!token) {
       if (referralCode) {
+        // 👉 referral hai → register
         return navigate(`/register?ref=${referralCode}&course=${course._id}`);
       } else {
+        // 👉 no referral → login
         return navigate(`/login?course=${course._id}`);
       }
     }
