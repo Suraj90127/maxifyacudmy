@@ -615,15 +615,15 @@ const PaymentPage = () => {
                     </li>
                     <li className="flex items-start text-gray-700">
                       <FaCheckCircle className="text-green-500 mr-2 flex-shrink-0 mt-0.5 text-xs" />
-                      <span className="text-xs">Certificate of completion</span>
-                    </li>
-                    <li className="flex items-start text-gray-700">
-                      <FaCheckCircle className="text-green-500 mr-2 flex-shrink-0 mt-0.5 text-xs" />
                       <span className="text-xs">Priority support & community access</span>
                     </li>
                     <li className="flex items-start text-gray-700">
                       <FaCheckCircle className="text-green-500 mr-2 flex-shrink-0 mt-0.5 text-xs" />
-                      <span className="text-xs">30-day money-back guarantee</span>
+                      <span className="text-xs">Access to Affiliate Earning System (ROI)</span>
+                    </li>
+                    <li className="flex items-start text-gray-700">
+                      <FaCheckCircle className="text-green-500 mr-2 flex-shrink-0 mt-0.5 text-xs" />
+                      <span className="text-xs">1-day money-back guarantee</span>
                     </li>
                   </ul>
                 </div>
@@ -803,15 +803,15 @@ const PaymentPage = () => {
                       </li>
                       <li className="flex items-start text-gray-700">
                         <FaCheckCircle className="text-green-500 mr-2 sm:mr-3 flex-shrink-0 mt-0.5 text-sm sm:text-base" />
-                        <span className="text-xs sm:text-sm">Certificate of completion</span>
-                      </li>
-                      <li className="flex items-start text-gray-700">
-                        <FaCheckCircle className="text-green-500 mr-2 sm:mr-3 flex-shrink-0 mt-0.5 text-sm sm:text-base" />
                         <span className="text-xs sm:text-sm">Priority support & community access</span>
                       </li>
                       <li className="flex items-start text-gray-700">
                         <FaCheckCircle className="text-green-500 mr-2 sm:mr-3 flex-shrink-0 mt-0.5 text-sm sm:text-base" />
-                        <span className="text-xs sm:text-sm">30-day money-back guarantee</span>
+                        <span className="text-xs sm:text-sm">Access to Affiliate Earning System (ROI)</span>
+                      </li>
+                      <li className="flex items-start text-gray-700">
+                        <FaCheckCircle className="text-green-500 mr-2 sm:mr-3 flex-shrink-0 mt-0.5 text-sm sm:text-base" />
+                        <span className="text-xs sm:text-sm">1-day money-back guarantee</span>
                       </li>
                     </ul>
                   </div>
