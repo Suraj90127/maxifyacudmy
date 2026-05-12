@@ -310,7 +310,7 @@ const PaymentPage = () => {
   /* ================= LOADING ================= */
   if (courseLoading || paymentLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 text-gray-700">
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-gray-50 to-gray-100 text-gray-700">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-lg font-medium">Loading payment details...</p>
@@ -321,7 +321,7 @@ const PaymentPage = () => {
 
   if (!course) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 px-4">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-linear-to-br from-gray-50 to-gray-100 px-4">
         <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md text-center">
           <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <FaCreditCard className="text-3xl text-red-500" />
@@ -341,7 +341,7 @@ const PaymentPage = () => {
 
   /* ================= UI ================= */
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-6 px-4 sm:px-6">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 py-6 px-4 sm:px-6">
       <div className="max-w-7xl mx-auto">
         {/* Header - Mobile Optimized */}
         <div className="mb-6">
@@ -386,7 +386,7 @@ const PaymentPage = () => {
                 {/* Features Grid - Compact on Mobile */}
                 <div className=" hidden sm:grid grid-cols-2 gap-2 mb-4">
                   <div className="flex items-center p-2 bg-gray-50 rounded-lg">
-                    <div className="w-7 h-7 bg-primary/10 rounded flex items-center justify-center mr-2 flex-shrink-0">
+                    <div className="w-7 h-7 bg-primary/10 rounded flex items-center justify-center mr-2 shrink-0">
                       <FaLock className="text-primary text-xs" />
                     </div>
                     <div>
@@ -395,7 +395,7 @@ const PaymentPage = () => {
                   </div>
 
                   <div className="flex items-center p-2 bg-gray-50 rounded-lg">
-                    <div className="w-7 h-7 bg-primary/10 rounded flex items-center justify-center mr-2 flex-shrink-0">
+                    <div className="w-7 h-7 bg-primary/10 rounded flex items-center justify-center mr-2 shrink-0">
                       <FaBolt className="text-primary text-xs" />
                     </div>
                     <div>
@@ -404,7 +404,7 @@ const PaymentPage = () => {
                   </div>
 
                   <div className="flex items-center p-2 bg-gray-50 rounded-lg">
-                    <div className="w-7 h-7 bg-primary/10 rounded flex items-center justify-center mr-2 flex-shrink-0">
+                    <div className="w-7 h-7 bg-primary/10 rounded flex items-center justify-center mr-2 shrink-0">
                       <FaInfinity className="text-primary text-xs" />
                     </div>
                     <div>
@@ -413,7 +413,7 @@ const PaymentPage = () => {
                   </div>
 
                   <div className="flex items-center p-2 bg-gray-50 rounded-lg">
-                    <div className="w-7 h-7 bg-primary/10 rounded flex items-center justify-center mr-2 flex-shrink-0">
+                    <div className="w-7 h-7 bg-primary/10 rounded flex items-center justify-center mr-2 shrink-0">
                       <FaHeadphonesAlt className="text-primary text-xs" />
                     </div>
                     <div>
@@ -459,7 +459,7 @@ const PaymentPage = () => {
                 {/* Features Grid - Responsive */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
                   <div className="flex items-center p-3 bg-gray-50 rounded-lg sm:rounded-xl">
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary/10 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary/10 rounded-lg flex items-center justify-center mr-3 shrink-0">
                       <FaLock className="text-primary text-sm sm:text-base" />
                     </div>
                     <div className="min-w-0">
@@ -469,7 +469,7 @@ const PaymentPage = () => {
                   </div>
 
                   <div className="flex items-center p-3 bg-gray-50 rounded-lg sm:rounded-xl">
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary/10 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary/10 rounded-lg flex items-center justify-center mr-3 shrink-0">
                       <FaBolt className="text-primary text-sm sm:text-base" />
                     </div>
                     <div className="min-w-0">
@@ -479,7 +479,7 @@ const PaymentPage = () => {
                   </div>
 
                   <div className="flex items-center p-3 bg-gray-50 rounded-lg sm:rounded-xl">
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary/10 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary/10 rounded-lg flex items-center justify-center mr-3 shrink-0">
                       <FaInfinity className="text-primary text-sm sm:text-base" />
                     </div>
                     <div className="min-w-0">
@@ -489,7 +489,7 @@ const PaymentPage = () => {
                   </div>
 
                   <div className="flex items-center p-3 bg-gray-50 rounded-lg sm:rounded-xl">
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary/10 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary/10 rounded-lg flex items-center justify-center mr-3 shrink-0">
                       <FaHeadphonesAlt className="text-primary text-sm sm:text-base" />
                     </div>
                     <div className="min-w-0">
@@ -610,19 +610,19 @@ const PaymentPage = () => {
                   </h4>
                   <ul className="space-y-2">
                     <li className="flex items-start text-gray-700">
-                      <FaCheckCircle className="text-green-500 mr-2 flex-shrink-0 mt-0.5 text-xs" />
+                      <FaCheckCircle className="text-green-500 mr-2 shrink-0 mt-0.5 text-xs" />
                       <span className="text-xs">Full lifetime access to all course materials</span>
                     </li>
                     <li className="flex items-start text-gray-700">
-                      <FaCheckCircle className="text-green-500 mr-2 flex-shrink-0 mt-0.5 text-xs" />
+                      <FaCheckCircle className="text-green-500 mr-2 shrink-0 mt-0.5 text-xs" />
                       <span className="text-xs">Priority support & community access</span>
                     </li>
                     <li className="flex items-start text-gray-700">
-                      <FaCheckCircle className="text-green-500 mr-2 flex-shrink-0 mt-0.5 text-xs" />
+                      <FaCheckCircle className="text-green-500 mr-2 shrink-0 mt-0.5 text-xs" />
                       <span className="text-xs">Access to Affiliate Earning System (ROI)</span>
                     </li>
                     <li className="flex items-start text-gray-700">
-                      <FaCheckCircle className="text-green-500 mr-2 flex-shrink-0 mt-0.5 text-xs" />
+                      <FaCheckCircle className="text-green-500 mr-2 shrink-0 mt-0.5 text-xs" />
                       <span className="text-xs">1-day money-back guarantee</span>
                     </li>
                   </ul>
@@ -654,7 +654,7 @@ const PaymentPage = () => {
                   {reviews.slice(-3).reverse().map((review) => (
                     <div key={review._id} className="border-b border-gray-100 pb-4 sm:pb-6 last:border-0 last:pb-0">
                       <div className="flex gap-3 sm:gap-4">
-                        <div className="flex-shrink-0">
+                        <div className="shrink-0">
                           <div className="w-10 h-10 sm:w-12 sm:h-12  bg-[#0092B9] rounded-full flex items-center justify-center text-white font-bold text-base sm:text-lg">
                             {review.reviewer_name?.[0]?.toUpperCase() || "U"}
                           </div>
@@ -798,19 +798,19 @@ const PaymentPage = () => {
                     </h4>
                     <ul className="space-y-2 sm:space-y-3">
                       <li className="flex items-start text-gray-700">
-                        <FaCheckCircle className="text-green-500 mr-2 sm:mr-3 flex-shrink-0 mt-0.5 text-sm sm:text-base" />
+                        <FaCheckCircle className="text-green-500 mr-2 sm:mr-3 shrink-0 mt-0.5 text-sm sm:text-base" />
                         <span className="text-xs sm:text-sm">Full lifetime access to all course materials</span>
                       </li>
                       <li className="flex items-start text-gray-700">
-                        <FaCheckCircle className="text-green-500 mr-2 sm:mr-3 flex-shrink-0 mt-0.5 text-sm sm:text-base" />
+                        <FaCheckCircle className="text-green-500 mr-2 sm:mr-3 shrink-0 mt-0.5 text-sm sm:text-base" />
                         <span className="text-xs sm:text-sm">Priority support & community access</span>
                       </li>
                       <li className="flex items-start text-gray-700">
-                        <FaCheckCircle className="text-green-500 mr-2 sm:mr-3 flex-shrink-0 mt-0.5 text-sm sm:text-base" />
+                        <FaCheckCircle className="text-green-500 mr-2 sm:mr-3 shrink-0 mt-0.5 text-sm sm:text-base" />
                         <span className="text-xs sm:text-sm">Access to Affiliate Earning System (ROI)</span>
                       </li>
                       <li className="flex items-start text-gray-700">
-                        <FaCheckCircle className="text-green-500 mr-2 sm:mr-3 flex-shrink-0 mt-0.5 text-sm sm:text-base" />
+                        <FaCheckCircle className="text-green-500 mr-2 sm:mr-3 shrink-0 mt-0.5 text-sm sm:text-base" />
                         <span className="text-xs sm:text-sm">1-day money-back guarantee</span>
                       </li>
                     </ul>
@@ -842,7 +842,7 @@ const PaymentPage = () => {
                     {reviews.slice(-2).reverse().map((review) => (
                       <div key={review._id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
                         <div className="flex gap-3">
-                          <div className="flex-shrink-0">
+                          <div className="shrink-0">
                             <div className="w-10 h-10 bg-[#0092B9] rounded-full flex items-center justify-center text-white font-bold text-base">
                               {review.reviewer_name?.[0]?.toUpperCase() || "U"}
                             </div>
