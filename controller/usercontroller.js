@@ -183,33 +183,117 @@ exports.verifyOTP = async (req, res) => {
 exports.loginUser = async (req, res) => {
   try {
     let { login, password } = req.body;
-    login = normalizeEmail(login) || login.trim();
+
+    // ================= VALIDATION =================
+
+    if (!login || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Login and password required.",
+      });
+    }
+
+    // ================= CLEAN LOGIN =================
+
+    login = String(login)
+      .trim()
+      .toLowerCase();
+
+    // ================= FIND USER =================
 
     const user = await User.findOne({
-      $or: [{ email: login }, { mobile: login }],
+      $or: [
+        {
+          email: login,
+        },
+        {
+          mobile: login,
+        },
+      ],
+    }).select("+password");
+
+    // ================= USER CHECK =================
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid login.",
+      });
+    }
+
+    // ================= VERIFY CHECK =================
+
+    if (!user.is_verified) {
+      return res.status(403).json({
+        success: false,
+        message: "Please verify OTP first.",
+      });
+    }
+
+    // ================= PASSWORD CHECK =================
+
+    const match = await bcrypt.compare(
+      password,
+      user.password
+    );
+
+    if (!match) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid credentials.",
+      });
+    }
+
+    // ================= TOKEN =================
+
+    const token = createToken({
+      id: user._id,
+      role: user.role,
     });
 
-    if (!user)
-      return res.status(400).json({ message: "Invalid login." });
+    // ================= COOKIE =================
 
-    if (!user.is_verified)
-      return res.status(403).json({ message: "Please verify OTP first." });
-
-    const match = await bcrypt.compare(password, user.password);
-    if (!match)
-      return res.status(400).json({ message: "Invalid credentials." });
-
-    const token = createToken({ id: user._id, role: user.role });
     res.cookie("token", token, {
       httpOnly: true,
       sameSite: "strict",
-      secure: false,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      secure:
+        process.env.NODE_ENV ===
+        "production",
+      maxAge:
+        7 *
+        24 *
+        60 *
+        60 *
+        1000,
     });
 
-    return res.status(200).json({ message: "Login successful", user });
+    // ================= REMOVE PASSWORD =================
+
+    const userData = user.toObject();
+
+    delete userData.password;
+
+    // ================= RESPONSE =================
+
+    return res.status(200).json({
+      success: true,
+      message: "Login successful",
+      token,
+      user: userData,
+    });
+
   } catch (err) {
-    return res.status(500).json({ message: err.message });
+    console.error(
+      "LOGIN ERROR =>",
+      err
+    );
+
+    return res.status(500).json({
+      success: false,
+      message:
+        err.message ||
+        "Internal server error.",
+    });
   }
 };
 
