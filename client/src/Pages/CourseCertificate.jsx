@@ -73,7 +73,7 @@ const CourseCertificate = () => {
             Download your certificate after completing all lessons.
           </p>
 
-          {/* <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4">
             <button
               onClick={handleDownload}
               disabled={loading}
@@ -90,7 +90,7 @@ const CourseCertificate = () => {
               <FaArrowLeft />
               Go Back
             </button>
-          </div> */}
+          </div>
         </div>
       </div>
     </UserLayout>

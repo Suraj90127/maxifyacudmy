@@ -562,7 +562,7 @@ const VideoCoursePlayer = () => {
               />
             </div>
 
-            <p className="text-[11px] font-bold text-slate-400 mt-2 uppercase">
+            {/* <p className="text-[11px] font-bold text-slate-400 mt-2 uppercase">
               {realCoursePercent === 100 && (
                 <button
                   onClick={() =>
@@ -576,7 +576,7 @@ const VideoCoursePlayer = () => {
                   Download Certificate
                 </button>
               )} / {realTotalVideos} Lessons Completed
-            </p>
+            </p> */}
           </div>
 
           <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
