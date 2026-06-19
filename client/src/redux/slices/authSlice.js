@@ -158,6 +158,35 @@ export const changePassword = createAsyncThunk(
 );
 
 /* ============================================================
+   10. GOOGLE LOGIN - Redirect to Google OAuth
+============================================================ */
+export const googleLogin = () => {
+  window.location.href =
+    `https://maxifyacademy.com/api/auth/google`;
+};
+
+/* ============================================================
+   CHECK AUTH AFTER GOOGLE REDIRECT
+============================================================ */
+
+export const handleGoogleCallback = createAsyncThunk(
+  "auth/handleGoogleCallback",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await api.get("/user/me", {
+        withCredentials: true,
+      });
+
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data?.message || "Google login failed"
+      );
+    }
+  }
+);
+
+/* ============================================================
    INITIAL STATE
 ============================================================ */
 const initialState = {
@@ -235,13 +264,16 @@ const authSlice = createSlice({
 
       // LOGOUT
       .addCase(logoutUser.fulfilled, (state) => {
-        state.user = null;
-
         localStorage.removeItem("user");
-        localStorage.removeItem("token"); // safety
+        localStorage.removeItem("token");
+
+        state.user = null;
+        state.loading = false;
+        state.isAuthLoading = false;
+        state.otpSent = false;
+        state.otpVerified = false;
       })
 
-      // GET PROFILE
       // GET PROFILE
       .addCase(getProfile.pending, (state) => {
         state.isAuthLoading = true;
@@ -255,12 +287,32 @@ const authSlice = createSlice({
         state.isAuthLoading = false;
         state.user = null;
       })
+
       // COMPLETE PROFILE
       .addCase(completeProfile.fulfilled, (state, action) => {
         state.user = action.payload;
         localStorage.setItem("user", JSON.stringify(action.payload));
+      })// GOOGLE CALLBACK
+      .addCase(handleGoogleCallback.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(handleGoogleCallback.fulfilled, (state, action) => {
+        state.loading = false;
+
+        const user = action.payload.user || action.payload;
+
+        state.user = user;
+
+        localStorage.setItem(
+          "user",
+          JSON.stringify(user)
+        );
+      })
+      .addCase(handleGoogleCallback.rejected, (state) => {
+        state.loading = false;
+        state.user = null;
       });
-},
+  },
 });
 
 export const { resetOTPState } = authSlice.actions;

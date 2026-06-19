@@ -1,159 +1,330 @@
+import React, { useEffect, useRef } from "react";
+import {
+  Star,
+  Play,
+  Users,
+  Clock,
+  Award,
+  Zap,
+  BookOpen,
+  CheckCircle,
+  Flame,
+  Gift,
+} from "lucide-react";
 
-import React, { useEffect } from "react";
+import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+
+/* REDUX */
 import { useDispatch, useSelector } from "react-redux";
 import { getAllCourses } from "../../../redux/slices/courseSlice";
 import { getAllCategories } from "../../../redux/slices/categoryCourseSlice";
-import { Link } from "react-router-dom";
-import { FaStar, FaRegStar, FaPlayCircle } from "react-icons/fa";
+import { getPurchasesByUser } from "../../../redux/slices/purchaseSlice";
+
+// Import Swiper styles
+import { Swiper, SwiperSlide } from 'swiper/react';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
 
 export default function Courses() {
   const dispatch = useDispatch();
+  const swiperRef = useRef(null);
 
-  // ✅ Safe defaults to avoid undefined errors
-  const { courses = [], loading, error } = useSelector(
-    (state) => state.courses
+  // =========================================
+  // REDUX STATE
+  // =========================================
+
+  const {
+    courses = [],
+    loading: coursesLoading,
+    error,
+  } = useSelector((state) => state.courses);
+
+  const { categories = [] } = useSelector((state) => state.categoryCourse);
+
+  // GET PURCHASES FROM PURCHASE SLICE
+  const { 
+    myPurchases = [], 
+    loading: purchasesLoading 
+  } = useSelector((state) => state.purchase || {});
+
+  // Create a Set of purchased/enrolled course IDs
+  const enrolledCourseIds = new Set(
+    myPurchases
+      .filter(purchase => purchase?.enrolled === true)
+      .map(purchase => purchase?.course_id?._id)
+      .filter(id => id)
   );
-  const { categories = [] } = useSelector(
-    (state) => state.categoryCourse
-  );
+
+  // =========================================
+  // FETCH DATA
+  // =========================================
 
   useEffect(() => {
     dispatch(getAllCourses());
     dispatch(getAllCategories());
+    dispatch(getPurchasesByUser());
   }, [dispatch]);
 
-  // ✅ Safe filtering
+  // =========================================
+  // FILTER COURSES
+  // =========================================
+
   const filteredCourses = courses.filter((course) =>
     categories.some((cat) => cat._id === course.category_id)
   );
 
-  return (
-    <div className="w-full py-10 bg-white">
-      {/* Section Title */}
-      <h2 className="text-center text-sm font-semibold text-gray-500 tracking-wide">
-        ONLINE COURSES
-      </h2>
-      <h1 className="text-center text-4xl font-semibold mt-2 mb-10">
-        Get Your Course With Us
-      </h1>
+  // Course Card Component
+  const CourseCard = ({ item, index }) => {
+    const isPurchased = enrolledCourseIds.has(item._id);
+    const categoryName = categories.find((cat) => cat._id === item.category_id)?.name || "Course";
+    const rating = Number(item.average_rating) || 4.9;
+    const reviewCount = item.review_count || 0;
+    const students = item.review_count ? item.review_count * 5 : 1200;
 
-      {/* Loading */}
-      {loading && (
-        <p className="text-center text-lg text-gray-600">
-          Loading courses...
-        </p>
-      )}
+    return (
+      <div className="group relative bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-premium transition-all duration-300 flex flex-col h-full border border-gray-100 hover:-translate-y-1 mb-10">
+        
+        {/* THUMBNAIL */}
+        <div className="relative overflow-hidden h-52">
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent z-10" />
+          <img
+            src={item.image || "https://via.placeholder.com/400x250"}
+            alt={item.title}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+          <span className="absolute top-4 left-4 bg-white/95 text-purple-600 text-xs font-semibold px-3 py-1.5 rounded-full shadow-sm z-20">
+            {categoryName}
+          </span>
+          <div className="absolute bottom-4 left-4 bg-black/70 text-white text-xs px-2 py-1 rounded-lg flex items-center gap-1 z-20">
+            <Clock size={12} />
+            <span>Premium Course</span>
+          </div>
+        </div>
 
-      {/* Error */}
-      {error && (
-        <p className="text-center text-red-600 text-lg">
-          {error}
-        </p>
-      )}
+        {/* CONTENT */}
+        <div className="p-5 flex flex-col flex-grow">
+          {/* TITLE */}
+          <h3 className="text-base font-bold text-gray-900 leading-snug mb-2 line-clamp-2 min-h-[48px]">
+            {item.title}
+          </h3>
 
-      {/* No Courses */}
-      {!loading && filteredCourses.length === 0 && (
-        <p className="text-center text-gray-600 text-lg">
-          No courses found.
-        </p>
-      )}
+          {/* RATINGS */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-1.5">
+              <div className="flex items-center">
+                <Star size={14} className="fill-yellow-400 text-yellow-400" />
+                <span className="text-sm font-semibold text-gray-900 ml-1">
+                  {rating.toFixed(1)}
+                </span>
+              </div>
+              <span className="text-xs text-gray-500">
+                ({reviewCount} reviews)
+              </span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Users size={12} className="text-gray-400" />
+              <span className="text-xs text-gray-600">
+                {students.toLocaleString()} students
+              </span>
+            </div>
+          </div>
 
-      {/* GRID */}
-      <div className="w-full py-8 bg-white">
-        <div className="max-w-7xl mx-auto px-4 lg:px-0">
+          {/* EXTRA INFO */}
+          <div className="flex items-center gap-3 mb-3">
+            <div className="flex items-center gap-1">
+              <Award size={12} className="text-purple-500" />
+              <span className="text-xs text-gray-600">All Levels</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Zap size={12} className="text-yellow-500" />
+              <span className="text-xs text-gray-600">Industry Ready</span>
+            </div>
+          </div>
 
+          {/* FEATURES */}
+          <div className="flex flex-wrap gap-2 mb-4">
+            {["Certificate", "Lifetime Access", "Projects"].map((feature, i) => (
+              <span
+                key={i}
+                className="inline-flex items-center gap-1 text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full"
+              >
+                <CheckCircle size={10} />
+                {feature}
+              </span>
+            ))}
+          </div>
 
-          {/* COURSES GRID */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredCourses.map((item) => {
-              const categoryName =
-                categories.find((cat) => cat._id === item.category_id)
-                  ?.name || "Course";
-
-              const ratingCount = Math.round(item.average_rating || 0);
-
-              return (
-                <div
-                  key={item._id}
-                  className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 flex flex-col hover:shadow-xl transition-shadow duration-300"
-                >
-                  {/* Clickable Area */}
-                  <Link to={`/course-info/${item._id}`} className="block">
-                    {/* Thumbnail */}
-                    <div className="relative group overflow-hidden">
-                      <img
-                        src={item.image || "https://via.placeholder.com/400x250"}
-                        alt={item.title}
-                        className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-
-                      {/* Category Badge */}
-                      <div className="absolute top-4 left-4 bg-[#FF4D4D] text-white text-[10px] font-bold px-3 py-1 rounded uppercase tracking-widest">
-                        {categoryName}
-                      </div>
-                    </div>
-
-                    {/* Content */}
-                    <div className="p-6 flex flex-col flex-grow">
-                      <h2 className="text-xl font-bold text-gray-800 leading-snug mb-3 line-clamp-2 h-14">
-                        {item.title}
-                      </h2>
-
-                      <div className="flex justify-between items-center mb-6">
-
-                        <div className="flex items-center gap-3">
-                          <p className="text-gray-500 text-sm font-medium">
-                            {item.review_count || 0} Students Rated
-                          </p>
-
-                          {item.referral_commission > 0 && (
-                            <span className="bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-1 rounded-full">
-                              Refer & Earn {item.referral_commission}%
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Rating Stars */}
-                        <div className="flex text-[#FFD700] space-x-0.5">
-                          {[...Array(5)].map((_, i) =>
-                            i < ratingCount ? (
-                              <FaStar key={i} size={16} />
-                            ) : (
-                              <FaRegStar key={i} size={16} className="text-gray-300" />
-                            )
-                          )}
-                        </div>
-
-                      </div>
-
-                      <hr className="border-gray-50 mb-6" />
-
-                      {/* Footer */}
-                      <div className="mt-auto flex items-center justify-between gap-2">
-                        <div className="flex flex-col">
-                          {item.discount_price && (
-                            <span className="text-gray-400 line-through text-sm">
-                              ₹{item.price}
-                            </span>
-                          )}
-                          <span className="text-xl font-black text-gray-900">
-                            ₹{item.discount_price || item.price}
-                          </span>
-                        </div>
-
-                        <span className="bg-gray-100 text-gray-900 font-bold py-2.5 px-5 rounded-full flex items-center gap-2 text-sm">
-                          <FaPlayCircle size={18} />
-                          Enroll Now
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
+          {/* FOOTER */}
+          <div className="mt-auto pt-4 border-t border-gray-100">
+            
+            {/* PRICE SECTION - Show "Enrolled" badge if purchased, otherwise show price */}
+            <div className="mb-4">
+              {isPurchased ? (
+                // Show "Enrolled" badge in place of price
+                <div className="flex items-center justify-center gap-2 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl py-3 px-4">
+                  <CheckCircle size={20} className="text-green-600" />
+                  <span className="text-lg font-bold text-green-700">Enrolled</span>
                 </div>
-              );
-            })}
+              ) : (
+                // Show price details
+                <>
+                  <div className="flex items-center gap-2 flex-wrap mb-2">
+                    {Number(item.price) === 0 ? (
+                      <p className="text-2xl font-bold text-purple-600">₹0</p>
+                    ) : (
+                      <>
+                        <p className="text-2xl font-bold text-purple-600">
+                          ₹{item.discount_price || item.price}
+                        </p>
+                        {item.discount_price && (
+                          <p className="text-sm text-gray-400 line-through">
+                            ₹{item.price}
+                          </p>
+                        )}
+                      </>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-green-50 px-2.5 py-1 rounded-full">
+                      <Gift size={10} />
+                      Save Big
+                    </span>
+                    {item.referral_commission > 0 && (
+                      <span className="inline-flex items-center gap-1 text-xs font-medium text-orange-700 bg-orange-50 px-2.5 py-1 rounded-full">
+                        Refer & Earn {item.referral_commission}%
+                      </span>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* BUTTON */}
+            {isPurchased ? (
+              <Link to={`/course-info/${item._id}`}>
+                <div className="w-full bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl py-3 px-4 text-white font-semibold text-sm flex items-center justify-center gap-2 transition-all duration-300 group-hover:shadow-lg cursor-pointer">
+                  Continue Learning
+                  <Play size={14} />
+                </div>
+              </Link>
+            ) : (
+              <Link to={`/course-info/${item._id}`}>
+                <div className="w-full bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl py-3 px-4 text-white font-semibold text-sm flex items-center justify-center gap-2 transition-all duration-300 group-hover:shadow-lg cursor-pointer">
+                  Enroll Now
+                  <Play size={14} />
+                </div>
+              </Link>
+            )}
           </div>
         </div>
       </div>
-    </div>
+    );
+  };
+
+  return (
+    <section className="w-full bg-gradient-to-b from-gray-50 to-white py-6 md:py-8" id="courses">
+      <div className="max-w-[95rem] mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* SECTION HEADER */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7 }}
+          viewport={{ once: true }}
+          className="text-center max-w-3xl mx-auto"
+        >
+          <div className="inline-flex items-center gap-2 bg-purple-50 px-3 py-1 rounded-full mb-4">
+            <BookOpen size={14} className="text-purple-600" />
+            <span className="text-xs font-semibold text-purple-600 uppercase tracking-wide">
+              Start Learning Today
+            </span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900">
+            Popular{" "}
+            <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+              Courses
+            </span>
+          </h2>
+          <p className="mt-4 text-base md:text-lg text-gray-600 leading-relaxed">
+            Choose from our most popular courses and start your learning journey today.
+            <span className="block text-sm text-purple-600 font-semibold mt-1">
+              {filteredCourses?.length || 0}+ premium courses available
+            </span>
+          </p>
+        </motion.div>
+
+        {/* LOADING STATES */}
+        {(coursesLoading || purchasesLoading) && (
+          <div className="flex justify-center items-center py-20">
+            <div className="w-10 h-10 border-4 border-purple-300 border-t-purple-600 rounded-full animate-spin"></div>
+          </div>
+        )}
+
+        {/* ERROR */}
+        {error && (
+          <div className="text-center py-16">
+            <p className="text-red-500 text-lg font-semibold">{error}</p>
+          </div>
+        )}
+
+        {/* EMPTY */}
+        {!coursesLoading && !purchasesLoading && filteredCourses.length === 0 && (
+          <div className="text-center py-16">
+            <h3 className="text-2xl font-bold text-gray-800">No Courses Found</h3>
+            <p className="text-gray-500 mt-2">Please check back later.</p>
+          </div>
+        )}
+
+        {/* COURSES */}
+        {!coursesLoading && !purchasesLoading && filteredCourses.length > 0 && (
+          <>
+            {/* Desktop Swiper View */}
+            <div className="hidden md:block mt-12 md:mt-16 mb-3">
+              <Swiper
+                ref={swiperRef}
+                spaceBetween={24}
+                slidesPerView={1}
+                breakpoints={{
+                  768: { slidesPerView: 2, spaceBetween: 20 },
+                  1024: { slidesPerView: 4, spaceBetween: 20 },
+                }}
+                className="courses-swiper"
+              >
+                {filteredCourses.map((item, index) => (
+                  <SwiperSlide key={item._id}>
+                    <CourseCard item={item} index={index}/>
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+
+              {/* Navigation Buttons */}
+              <div className="flex justify-center items-center gap-4 -mt-3">
+                <button
+                  onClick={() => swiperRef.current?.swiper?.slidePrev()}
+                  className="w-10 h-10 rounded-full bg-white shadow-md hover:bg-purple-600 hover:text-white transition-all duration-300 flex items-center justify-center text-purple-600 border border-gray-200"
+                >
+                  ←
+                </button>
+                <button
+                  onClick={() => swiperRef.current?.swiper?.slideNext()}
+                  className="w-10 h-10 rounded-full bg-white shadow-md hover:bg-purple-600 hover:text-white transition-all duration-300 flex items-center justify-center text-purple-600 border border-gray-200"
+                >
+                  →
+                </button>
+              </div>
+            </div>
+
+            {/* Mobile Grid View */}
+            <div className="block md:hidden mt-12 grid gap-6 sm:gap-8 mb-4">
+              {filteredCourses.map((item, index) => (
+                <CourseCard key={item._id} item={item} index={index} />
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    </section>
   );
 }

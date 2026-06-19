@@ -53,6 +53,10 @@ import "./index.css";
 import PaymentPage from "./Pages/PaymentPage";
 import PaymentSuccess from "./Pages/PaymentSuccess";
 import CourseCertificate from "./Pages/CourseCertificate";
+import ProjectCaseStudy from "./Pages/ProjectCaseStudy";
+import GoogleCallback from "./Components/GoogleCallback";
+import Discussion from "./Pages/profile/Discussions";
+import MeetingRequestsPopup from "./Pages/MeetingRequestsPopup";
 
 /* ================== SCROLL TO TOP ================== */
 function ScrollToTop() {
@@ -75,13 +79,16 @@ function App() {
         <Route path="/" element={<Home />} />
 
         <Route path="/login" element={<Login />} />
+        <Route path="/auth/google/callback" element={<GoogleCallback />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgetpassword" element={<ForgetPassword />} />
         <Route path="/verify-otp" element={<VerifyAndReset />} />
 
         <Route path="/courses" element={<Courses />} />
         <Route path="/courses/:categoryId" element={<CategoryCourses />} />
+        <Route path="/project/:slug" element={<ProjectCaseStudy />} />
         <Route path="/course-info/:id" element={<CourseInfo />} />
+
 
         <Route path="/contact" element={<Contact />} />
 
@@ -129,10 +136,12 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="meetings" element={<MeetingRequestsPopup />} />
           <Route path="my-course" element={<MyCourse />} />
           <Route path="payment-history" element={<PaymentHistory />} />
           <Route path="my-referral" element={<MyReferral />} />
           <Route path="support" element={<Support />} />
+          <Route path="discussions" element={<Discussion />} />
           <Route path="change-password" element={<ChangePassword />} />
         </Route>
 

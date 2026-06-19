@@ -1,15 +1,13 @@
-// src/components/ProtectedRoute.jsx
 import React from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useSelector((state) => state.auth);
-
-  // LocalStorage fallback
   const token = localStorage.getItem("token");
+  const location = useLocation();
+  const redirectTo = `${location.pathname}${location.search}${location.hash}`;
 
-  // Loading animation
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -18,9 +16,15 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
-  // 😎 If user not logged in + no token → redirect to login
   if (!user && !token) {
-    return <Navigate to="/login" replace />;
+    // Save the attempted URL for redirect after login
+    return (
+      <Navigate
+        to={`/login?redirect=${encodeURIComponent(redirectTo)}`}
+        state={{ from: redirectTo }}
+        replace
+      />
+    );
   }
 
   return children;

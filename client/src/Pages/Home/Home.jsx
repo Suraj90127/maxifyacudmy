@@ -14,6 +14,17 @@ import TestimonialSection from './components/Testmonial';
 import CallToActionSection from './components/CalltoAction';
 import UserLayout from '../../Layouts/UserLayout';
 import Blog from './components/Blog';
+import Skills from './components/Skills';
+import Projects from './components/Projects';
+import CareerPaths from './components/CareerPaths';
+import Roadmap from './components/Roadmap';
+import Mentors from './components/Mentors';
+import FAQ from './components/FAQ';
+import FinalCTA from './components/FinalCTA';
+import TeamGallery from './components/TeamGallery';
+import TeamMomentsGallery from './components/TeamMomentsGallery';
+import CertificateSection from './components/CertificateSection';
+import ScrollToTop from '../../Components/ScrollToTop';
 
 const Home = () => {
 
@@ -66,16 +77,28 @@ const Home = () => {
       <main className="main-wrapper overflow-x-hidden">
 
         <HeroSection />
-        <HomeAbout />
-        <CourseCategories />
-        <FeaturesSection />
+        <Skills />
+        {/* <HomeAbout /> */}
+        {/* <CourseCategories /> */}
+        {/* <FeaturesSection /> */}
         <Courses />
+        <Projects />
+        <CertificateSection />
+        <CareerPaths />
+        <Roadmap />
+        <Mentors />
+        {/* <TeamGallery /> */}
+
         <WhyChooseUs />
-        <FunFact />
-        <PartnerSection />
+        <TeamMomentsGallery />
+        {/* <FunFact /> */}
+        {/* <PartnerSection /> */}
         <TestimonialSection />
-        <Blog />
-        <CallToActionSection />
+        <FAQ />
+        {/* <Blog /> */}
+        {/* <CallToActionSection /> */}
+        <FinalCTA />
+        <ScrollToTop />
 
       </main>
     </UserLayout>

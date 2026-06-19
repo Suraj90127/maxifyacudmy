@@ -138,7 +138,7 @@
 
 
 import React, { useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getSingleProduct } from "../../redux/slices/productSlice";
 import UserLayout from "../../Layouts/UserLayout";
@@ -161,6 +161,8 @@ const ProductDetails = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
+  const loginRedirect = `/login?redirect=${encodeURIComponent(`${location.pathname}${location.search}${location.hash}`)}`;
 
   const { product, loading } = useSelector((state) => state.products);
   const user = JSON.parse(localStorage.getItem("user"));
@@ -281,7 +283,7 @@ const ProductDetails = () => {
                           onClick={() => {
                             if (!user) {
                               toast.error("Please log in first.");
-                              return navigate("/login");
+                              return navigate(loginRedirect);
                             }
                             window.open(cleanPdfUrl, "_blank");
                           }}

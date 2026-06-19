@@ -11,6 +11,7 @@ import contactReducer from "./slices/contactSlice";
 import supportTicketReducer from "./slices/supportTicketSlice";
 import withdrawalReducer from "./slices/withdrawalSlice";
 import subscriptionReducer from "./slices/subscriptionSlice";
+import courseDiscussionReducer from "./slices/courseDiscussionSlice";
 
 // ⭐ Existing
 import progressReducer from "./slices/progressSlice";
@@ -21,6 +22,10 @@ import courseProgressReducer from "./slices/courseProgressSlice";
 import certificateReducer from "./slices/certificateSlice";
 import amountReducer from './slices/amountSlice'
 import leadReducer from "./slices/socialLeadSlice";
+import careerReducer from "./slices/careerSlice";
+import meetRequestReducer from "./slices/meetRequestSlice";
+import meetingSlotReducer from "./slices/meetingSlotSlice";
+import assignmentSubmissionReducer from "./slices/assignmentSubmissionSlice";
 
 
 const store = configureStore({
@@ -44,6 +49,11 @@ const store = configureStore({
     amount: amountReducer,
     certificate: certificateReducer,
     lead: leadReducer,
+    career: careerReducer,
+    meetRequest: meetRequestReducer,
+    courseDiscussion: courseDiscussionReducer,
+    meetingSlots: meetingSlotReducer,
+    assignmentSubmission: assignmentSubmissionReducer,
 
 
 

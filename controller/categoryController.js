@@ -8,7 +8,7 @@ const Course = require("../models/Course");
 exports.createCategory = async (req, res) => {
   try {
 
-    const { name } = req.body;
+    const { name,desc,fulldesc } = req.body;
 
     if (!name) {
       return res.status(400).json({ message: "Name is required" });
@@ -38,6 +38,8 @@ exports.createCategory = async (req, res) => {
     // ---- Save to DB ----
     const category = await Category.create({
       name,
+      desc,
+      fulldesc,
       slug,
       image: imageUrl,
     });
@@ -60,33 +62,56 @@ exports.getAllCategories = async (req, res) => {
     const categories = await Category.aggregate([
       {
         $lookup: {
-          from: "courses",            // course collection name
-          localField: "_id",          // Category _id
-          foreignField: "category_id", // mapping with Course.category_id
-          as: "courses"
-        }
+          from: "courses",
+          let: { categoryId: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ["$category_id", "$$categoryId"],
+                },
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          as: "courseStats",
+        },
       },
       {
         $addFields: {
-          totalCourses: { $size: "$courses" }
-        }
+          totalCourses: {
+            $ifNull: [
+              { $arrayElemAt: ["$courseStats.count", 0] },
+              0,
+            ],
+          },
+        },
       },
       {
-        $sort: { createdAt: -1 }
-      }
+        $project: {
+          courseStats: 0,
+        },
+      },
+      {
+        $sort: {
+          createdAt: -1,
+        },
+      },
     ]);
 
     return res.status(200).json({
       success: true,
       total: categories.length,
-      categories
+      categories,
     });
-
   } catch (error) {
     console.error("Error fetching categories:", error);
+
     return res.status(500).json({
       success: false,
-      message: "Internal server error"
+      message: "Internal server error",
     });
   }
 };

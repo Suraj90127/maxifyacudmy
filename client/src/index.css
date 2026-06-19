@@ -1,4 +1,11 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}
 
 @keyframes scaleIn {
   from {
@@ -43,4 +50,17 @@
 
 .animate-scaleIn {
   animation: scaleIn 0.2s ease-out;
+}
+
+@keyframes watermarkMove {
+  0% {
+    transform: translate(-100%, -100%);
+  }
+  100% {
+    transform: translate(100vw, 100vh);
+  }
+}
+
+.animate-watermark {
+  animation: watermarkMove 15s linear infinite;
 }

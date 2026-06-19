@@ -55,6 +55,63 @@ export const getCourseContentByCourseId = createAsyncThunk(
   }
 );
 
+export const downloadVideoPdf = createAsyncThunk(
+  "course/downloadVideoPdf",
+  async ({ contentId, videoId }, { rejectWithValue }) => {
+    try {
+      const response = await api.get(
+        `/course-content/download-pdf/${contentId}/${videoId}`,
+        {
+          responseType: "blob",
+        }
+      );
+
+      let fileName = "lecture.pdf";
+
+      const disposition = response.headers["content-disposition"];
+
+      if (disposition) {
+        // filename*=UTF-8''
+        const utf8Match = disposition.match(/filename\*=UTF-8''([^;]+)/);
+
+        if (utf8Match) {
+          fileName = decodeURIComponent(utf8Match[1]);
+        } else {
+          const normalMatch = disposition.match(/filename="?([^"]+)"?/);
+
+          if (normalMatch) {
+            fileName = normalMatch[1];
+          }
+        }
+      }
+
+      console.log("Downloaded filename:", fileName);
+
+      const blob = new Blob([response.data], {
+        type: "application/pdf",
+      });
+
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName;
+
+      document.body.appendChild(link);
+      link.click();
+
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      return fileName;
+    } catch (error) {
+      return rejectWithValue(
+        error?.response?.data?.message || "Download failed"
+      );
+    }
+  }
+);
+
 
 const courseSlice = createSlice({
   name: "courses",
@@ -65,6 +122,8 @@ const courseSlice = createSlice({
     courseContent: [],
     loading: false,
     error: null,
+    downloadLoading: false,
+    downloadError: null,
   },
 
   reducers: {
@@ -127,7 +186,19 @@ const courseSlice = createSlice({
       .addCase(getCourseBySlug.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      .addCase(downloadVideoPdf.pending, (state) => {
+        state.downloadLoading = true;
+        state.downloadError = null;
+      })
+      .addCase(downloadVideoPdf.fulfilled, (state) => {
+        state.downloadLoading = false;
+      })
+      .addCase(downloadVideoPdf.rejected, (state, action) => {
+        state.downloadLoading = false;
+        state.downloadError = action.payload;
       });
+
   },
 });
 

@@ -24,6 +24,16 @@ const subscriptionRoutes = require("./routes/subscriptionRoutes");
 const withdrawalRoutes = require("./routes/withdrawalRoutes");
 const socialLinksRoutes = require("./routes/socialLinksRoutes");
 const courseProgressRoutes = require("./routes/courseProgressRoutes");
+const slotRoute = require("./routes/meetingSlotRoutes");
+const assignmentSubmissionRoutes = require("./routes/assignmentSubmissionRoutes");
+const downloadProxy = require("./routes/downloadProxy");
+const compression = require("compression");
+
+require("./cron/emailCron");
+
+
+
+
 const Visitor = require("./models/Visitor");
 const UAParser = require("ua-parser-js");
 const dns = require("dns");
@@ -34,6 +44,12 @@ dns.setServers(["1.1.1.1", "8.8.8.8"]);
 
 
 const app = express();
+const passport = require("passport");
+
+app.use(compression());
+require("./config/passport");
+
+app.use(passport.initialize());
 
 /* ================= CONNECT DB FIRST ================= */
 db();
@@ -49,9 +65,9 @@ app.use(
     origin: [
       "http://localhost:5173",
       "http://localhost:5174",
-      "https://socialmedia.maxifyacademy.com" // ✅ correct domain
     ],
     credentials: true,
+    exposedHeaders: ["Content-Disposition"],
   })
 );
 app.set("trust proxy", true);
@@ -79,6 +95,15 @@ app.use("/api/withdrawal", withdrawalRoutes);
 app.use('/api/amount', require('./routes/amountRoute'))
 app.use("/api/certificate", require("./routes/certificateRoutes"));
 app.use("/api/social-lead", require("./routes/socialLeadRoutes"))
+app.use("/api/career", require("./routes/careerRoutes"))
+app.use("/api/meet-request", require("./routes/meetRequestRoutes"))
+app.use("/api/course-discussions", require("./routes/courseDiscussionRoutes"));
+app.use("/api/slots", slotRoute);
+app.use("/api/auth", require("./routes/googleAuthRoutes"));
+app.use("/api/assignment-submission", assignmentSubmissionRoutes);
+app.use("/api", downloadProxy);
+
+
 
 
 
@@ -113,12 +138,12 @@ app.get("/r", async (req, res) => {
 
     // 🔁 redirect
     res.redirect(
-      `https://maxifyacademy.com/?ref=${ref}&course=${course}`
+      `https://maxifyacademy.trueprofit.biz/?ref=${ref}&course=${course}`
     );
 
   } catch (err) {
     console.log(err.message);
-    res.redirect("https://maxifyacademy.com");
+    res.redirect("https://maxifyacademy.trueprofit.biz/");
   }
 });
 

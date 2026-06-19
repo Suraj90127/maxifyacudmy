@@ -13,6 +13,8 @@ import {
   LogOut,
   ChevronRight,
   Menu,
+  Video,
+  MessagesSquare
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "../redux/slices/authSlice"; // <-- ADDED
@@ -27,13 +29,23 @@ const UserLayout = () => {
   const [overlayOpacity, setOverlayOpacity] = useState(0);
 
   const navigation = [
-    { name: "Profile", icon: User, href: "/my-courses/profile" },
-    { name: "Dashboard", icon: Home, href: "/my-courses/dashboard" },
-    { name: "My Course", icon: BookOpen, href: "/my-courses/my-course" },
-    { name: "Payment History", icon: Clock, href: "/my-courses/payment-history" },
-    { name: "My Referral", icon: Star, href: "/my-courses/my-referral" },
-    { name: "Support", icon: HelpCircle, href: "/my-courses/support" },
-    { name: "Change Password", icon: Settings, href: "/my-courses/change-password" },
+    { name: "Profile", icon: User, to: "/my-courses/profile" },
+    { name: "Dashboard", icon: Home, to: "/my-courses/dashboard" },
+    { name: "My Course", icon: BookOpen, to: "/my-courses/my-course" },
+    { name: "Meetings", icon: Video, to: "/my-courses/meetings" },
+    {
+      name: "Payment History",
+      icon: Clock,
+      to: "/my-courses/payment-history",
+    },
+    { name: "My Referral", icon: Star, to: "/my-courses/my-referral" },
+    { name: "Support", icon: HelpCircle, to: "/my-courses/support" },
+    { name: "Discussion", icon: MessagesSquare, to: "/my-courses/Discussions" },
+    {
+      name: "Change Password",
+      icon: Settings,
+      to: "/my-courses/change-password",
+    },
   ];
 
   useEffect(() => {
@@ -61,7 +73,7 @@ const UserLayout = () => {
 
   const getCurrentPageTitle = () => {
     const currentItem = navigation.find((item) =>
-      location.pathname.startsWith(item.href)
+      location.pathname.startsWith(item.to)
     );
     return currentItem ? currentItem.name : "Profile Setting";
   };
@@ -118,7 +130,7 @@ const UserLayout = () => {
       >
         <main className="flex-1 min-h-screen">
           <div className="py-6">
-            <div className="mx-auto px-4 sm:px-6 md:px-8">
+            <div className="mx-auto ">
               <Outlet />
             </div>
           </div>
@@ -173,16 +185,16 @@ const SidebarContent = ({ navigation, handleLogout, onClose, isMobile }) => {
       {/* Navigation */}
       <nav className="flex-1 px-4 py-6 space-y-1">
         {navigation.map((item) => {
-          const isActive = location.pathname.startsWith(item.href);
+          const isActive = location.pathname.startsWith(item.to);
           return (
             <NavLink
               key={item.name}
-              to={item.href}
+              to={item.to}
               onClick={isMobile ? onClose : undefined}
               className={`flex items-center px-4 py-3 text-sm md:text-base font-medium rounded-lg transition-all
                 ${
                   isActive
-                    ? "bg-[#F1F0FE] text-[#6366f1]"
+                    ? "bg-[#F1F0FE] text-[#6366f1] border-l-4 border-l-[#6366f1]"
                     : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
                 }`}
             >

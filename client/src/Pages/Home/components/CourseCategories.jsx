@@ -9,6 +9,7 @@ import {
   getCoursesByCategoryId,
 } from "../../../redux/slices/categoryCourseSlice";
 import { Link } from "react-router-dom";
+import AnimatedButton from "../../../Components/AnimatedButton";
 
 export default function CourseCategories() {
   const dispatch = useDispatch();
@@ -41,18 +42,14 @@ export default function CourseCategories() {
         {/* Button - use motion Link so navigation stays client-side */}
         <motion.div
           whileHover={{ scale: 1.02 }}
-          className="inline-flex items-center bg-[#003366] text-white px-4 w-42 py-3 rounded-full font-semibold shadow-md gap-4 relative mb-4 cursor-pointer"
+          className="inline-flex items-center  text-white rounded-full font-semibold shadow-md gap-4 relative mb-4 cursor-pointer"
         >
           <Link
             to="/courses"
             className="flex items-center gap-4 text-white"
             aria-label="Find all courses"
           >
-            <span className="text-white font-semibold">Find Courses</span>
-
-            <span className="w-10 h-10 absolute right-1 top-1/2 transform -translate-y-1/2 z-10 flex items-center justify-center bg-white rounded-full text-[#003366] shadow-sm">
-              <FiArrowRight size={18} />
-            </span>
+            <AnimatedButton text="Find Courses" />
           </Link>
         </motion.div>
       </div>

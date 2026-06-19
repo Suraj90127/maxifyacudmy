@@ -71,13 +71,29 @@ exports.createReview = async (req, res) => {
 // ---------------- GET ALL REVIEWS ----------------
 exports.getAllReviews = async (req, res) => {
   try {
-    const reviews = await Review.find()
-      .populate("user_id", "name email")
-      .populate("course_id", "title");
+    const reviews = await Review.find({})
+      .select("rating comment createdAt user_id course_id")
+      .populate({
+        path: "user_id",
+        select: "name email",
+        options: { lean: true },
+      })
+      .populate({
+        path: "course_id",
+        select: "title",
+        options: { lean: true },
+      })
+      .sort({ createdAt: -1 })
+      .lean();
 
-    return res.status(200).json({ reviews });
+    return res.status(200).json({
+      success: true,
+      count: reviews.length,
+      reviews,
+    });
   } catch (error) {
     return res.status(500).json({
+      success: false,
       message: "Failed to fetch reviews",
       error: error.message,
     });
@@ -88,7 +104,7 @@ exports.getAllReviews = async (req, res) => {
 exports.getReview = async (req, res) => {
   try {
     const review = await Review.findById(req.params.id)
-      .populate("user_id", "firstname" ," email")
+      .populate("user_id", "firstname", " email")
       .populate("course_id", "title");
 
     if (!review) return res.status(404).json({ message: "Review not found" });

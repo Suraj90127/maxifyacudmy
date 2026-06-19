@@ -249,6 +249,9 @@ exports.loginUser = async (req, res) => {
     const token = createToken({
       id: user._id,
       role: user.role,
+      name: user.firstname + " " + user.lastname,
+      email: user.email,
+      mobile: user.mobile,
     });
 
     // ================= COOKIE =================

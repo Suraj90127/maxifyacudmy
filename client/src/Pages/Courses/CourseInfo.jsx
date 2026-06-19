@@ -18,12 +18,13 @@ import {
   FaFacebookF,
   FaTwitter,
   FaLinkedinIn,
-  FaPinterestP
+  FaPinterestP,
+  FaCheckCircle
 } from "react-icons/fa";
 import Hls from "hls.js";
 import { useRef } from "react";
 
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import UserLayout from "../../Layouts/UserLayout";
 
 // Redux
@@ -141,14 +142,18 @@ const ShareModal = ({ course, onClose }) => {
     </div>
   );
 };
+// ... (imports same rahenge)
 
 const CourseDetail = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
+  const loginRedirect = `/login?redirect=${encodeURIComponent(`${location.pathname}${location.search}${location.hash}`)}`;
 
   const videoRef = useRef(null);
   const hlsRef = useRef(null);
+  const [videoError, setVideoError] = useState(false);
 
   const LIB_ID = "548872";
 
@@ -175,9 +180,6 @@ const CourseDetail = () => {
   }, [dispatch, id]);
 
   useEffect(() => {
-  }, [id, dispatch]);
-
-  useEffect(() => {
     if (myPurchases && course?._id) {
       const purchased = myPurchases.find((p) => p.course_id?._id === course._id);
       if (purchased) {
@@ -201,22 +203,31 @@ const CourseDetail = () => {
     });
   };
 
+  // HLS URL generation
   const getHlsUrl = (src) => {
-    if (!src) return "";
-
-    if (src.includes(".m3u8")) return src;
-
-    if (src.includes("b-cdn.net")) {
-      const parts = src.split("/");
-      const domain = parts[2];
-      const guid = parts[3];
-
-      return `https://${domain}/${guid}/playlist.m3u8`;
+    if (!src) return null;
+    
+    if (src.startsWith('http')) {
+      if (src.includes('.m3u8')) {
+        return src;
+      }
+      
+      if (src.includes('b-cdn.net')) {
+        try {
+          const url = new URL(src);
+          const pathParts = url.pathname.split('/').filter(Boolean);
+          const guid = pathParts.find(part => part.length === 36);
+          if (guid) {
+            return `https://${url.hostname}/${guid}/playlist.m3u8`;
+          }
+        } catch (e) {
+          console.error('Error parsing URL:', e);
+        }
+      }
     }
-
+    
     return `https://vz-${LIB_ID}.b-cdn.net/${src}/playlist.m3u8`;
   };
-
 
   const [previewVideo, setPreviewVideo] = useState(null);
 
@@ -238,38 +249,106 @@ const CourseDetail = () => {
     }
   }, []);
 
-
+  // Video player initialization
   useEffect(() => {
     if (!course?.video_url || !videoRef.current) return;
 
     const video = videoRef.current;
+    setVideoError(false);
 
     if (hlsRef.current) {
       hlsRef.current.destroy();
+      hlsRef.current = null;
     }
 
     const hlsUrl = getHlsUrl(course.video_url);
+    
+    if (!hlsUrl) {
+      console.error('Invalid video URL');
+      setVideoError(true);
+      return;
+    }
+
+    console.log('Loading video from:', hlsUrl);
 
     if (Hls.isSupported()) {
-      const hls = new Hls();
+      const hls = new Hls({
+        enableWorker: true,
+        lowLatencyMode: true,
+        backBufferLength: 90,
+      });
 
       hls.loadSource(hlsUrl);
       hls.attachMedia(video);
-
+      
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        video.play().catch(() => { });
+        console.log('HLS manifest parsed, attempting to play');
+        video.play().catch(err => {
+          console.log('Auto-play prevented:', err);
+        });
+      });
+
+      hls.on(Hls.Events.ERROR, (event, data) => {
+        console.error('HLS Error:', data);
+        if (data.fatal) {
+          setVideoError(true);
+          switch (data.type) {
+            case Hls.ErrorTypes.NETWORK_ERROR:
+              console.log('Network error, trying to recover...');
+              hls.startLoad();
+              break;
+            case Hls.ErrorTypes.MEDIA_ERROR:
+              console.log('Media error, trying to recover...');
+              hls.recoverMediaError();
+              break;
+            default:
+              console.log('Fatal error, cannot recover');
+              break;
+          }
+        }
       });
 
       hlsRef.current = hls;
-    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+    } 
+    else if (video.canPlayType('application/vnd.apple.mpegurl')) {
       video.src = hlsUrl;
-      video.play().catch(() => { });
+      video.addEventListener('loadedmetadata', () => {
+        video.play().catch(err => {
+          console.log('Auto-play prevented:', err);
+        });
+      });
+    } 
+    else if (course.video_url.includes('.mp4')) {
+      video.src = course.video_url;
+      video.addEventListener('loadedmetadata', () => {
+        video.play().catch(err => {
+          console.log('Auto-play prevented:', err);
+        });
+      });
+    }
+    else {
+      console.error('HLS is not supported in this browser');
+      setVideoError(true);
     }
 
+    return () => {
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
+      if (video) {
+        video.pause();
+        video.src = '';
+        video.load();
+      }
+    };
   }, [course?.video_url]);
+
   if (loading || !course) return <div className="text-center py-20 font-bold">Loading Course...</div>;
 
-  // ⭐ PRICE FIX LOGIC
+  // ⭐ PRICE FIX LOGIC - Check if user already purchased
+  const hasPurchased = isBought || isEnrolled;
+  
   const isFreeCourse =
     !course?.price ||
     Number(course.price) === 0 ||
@@ -278,7 +357,8 @@ const CourseDetail = () => {
   const hasDiscount =
     !isFreeCourse &&
     course.discount_price &&
-    Number(course.discount_price) < Number(course.price);
+    Number(course.discount_price) < Number(course.price) &&
+    !hasPurchased; // Hide discount if already purchased
 
   const finalAmount = hasDiscount
     ? Number(course.discount_price)
@@ -290,29 +370,22 @@ const CourseDetail = () => {
     setExpandedSections(updated);
   };
 
-
-
-
   const handleBuyCourse = async () => {
     const referralCode = localStorage.getItem("referralCode");
 
-    /* ================= REFERRAL FLOW ================= */
     if (isAuthLoading) {
       return toast.info("Please wait...");
     }
 
-    // ❌ only redirect if confirmed NOT logged in
     if (!user) {
       if (referralCode) {
         return navigate(`/register?ref=${referralCode}&course=${course._id}`);
       } else {
-        return navigate(`/login?course=${course._id}`);
+        return navigate(loginRedirect);
       }
     }
-    /* ================= USER LOGIN HAI → PAYMENT ================= */
 
     try {
-      /* ================= CREATE ORDER ================= */
       const orderRes = await dispatch(createOrder({ amount: finalAmount }));
 
       if (!createOrder.fulfilled.match(orderRes)) {
@@ -338,7 +411,6 @@ const CourseDetail = () => {
         name: "Maxify",
         description: course.title,
 
-        /* ================= SUCCESS ================= */
         handler: async (response) => {
           try {
             const verifyRes = await dispatch(
@@ -364,7 +436,6 @@ const CourseDetail = () => {
               return toast.error("Payment verification failed");
             }
 
-            /* ================= CREATE PURCHASE ================= */
             const purchaseRes = await dispatch(
               createPurchase({
                 course_id: course._id,
@@ -381,9 +452,7 @@ const CourseDetail = () => {
               throw new Error("Purchase failed");
             }
 
-            /* 🔥 CLEAR REFERRAL AFTER SUCCESS */
             localStorage.removeItem("referralCode");
-
             window.location.reload();
           } catch (err) {
             dispatch(
@@ -399,7 +468,6 @@ const CourseDetail = () => {
           }
         },
 
-        /* ❌ USER CLOSES POPUP */
         modal: {
           ondismiss: () => {
             dispatch(
@@ -454,10 +522,8 @@ const CourseDetail = () => {
     }
   };
 
-
-
   const handleEnrollCourse = async () => {
-    if (!user) return navigate("/login");
+    if (!user) return navigate(loginRedirect);
     const res = await dispatch(enrollCourse({ course_id: course._id }));
     if (enrollCourse.fulfilled.match(res)) navigate(`/course-content/${course._id}`);
   };
@@ -477,284 +543,291 @@ const CourseDetail = () => {
       ? course.learns.split(/\d+\.\s*/).filter(Boolean)
       : [];
 
+  // Price section component - Hide if user already purchased
+  const PriceSection = () => {
+    if (hasPurchased) {
+      return (
+        <div className="mb-6">
+          <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+            <FaCheckCircle className="text-green-600 text-2xl mx-auto mb-2" />
+            <p className="text-green-700 font-bold">Already Purchased!</p>
+            <p className="text-green-600 text-sm mt-1">You have access to this course</p>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex items-center gap-3 mb-6 flex-wrap">
+        {isFreeCourse ? (
+          <span className="text-2xl font-black text-green-600 uppercase">FREE</span>
+        ) : (
+          <>
+            {hasDiscount && (
+              <span className="line-through text-gray-400 text-lg">₹{course.price}</span>
+            )}
+            <h2 className="text-3xl font-black text-gray-900">₹{finalAmount}</h2>
+          </>
+        )}
+      </div>
+    );
+  };
+
+  // Button component based on purchase status
+  const ActionButton = () => {
+    if (hasPurchased || isEnrolled) {
+      return (
+        <button
+          onClick={() => navigate(`/course-content/${course._id}`)}
+          className="w-full bg-cyan-500 hover:bg-cyan-600 text-white py-4 rounded-xl font-black text-lg transition-all uppercase shadow-lg shadow-cyan-100"
+        >
+          Continue Learning
+        </button>
+      );
+    }
+    
+    if (course.price === 0 || course.is_premium === false) {
+      return (
+        <button
+          onClick={handleEnrollCourse}
+          className="w-full bg-cyan-500 hover:bg-cyan-600 text-white py-4 rounded-xl font-black text-lg transition-all uppercase shadow-lg shadow-cyan-100"
+        >
+          Enroll Now (Free)
+        </button>
+      );
+    }
+    
+    if (isBought) {
+      return (
+        <button
+          onClick={handleEnrollCourse}
+          className="w-full bg-cyan-500 hover:bg-cyan-600 text-white py-4 rounded-xl font-black text-lg transition-all uppercase shadow-lg shadow-cyan-100"
+        >
+          Enroll Now
+        </button>
+      );
+    }
+    
+    return (
+      <button
+        onClick={handleBuyCourse}
+        className="w-full bg-cyan-500 hover:bg-cyan-600 text-white py-4 rounded-xl font-black text-lg transition-all uppercase shadow-lg shadow-cyan-100"
+      >
+        Buy Now ₹{finalAmount}
+      </button>
+    );
+  };
+
   return (
-    <UserLayout>
-      {showShareModal && <ShareModal course={course} onClose={() => setShowShareModal(false)} />}
-      <div className="min-h-screen bg-white font-sans text-[#1c1d1f]">
-        <div className="mx-auto px-4 sm:px-6 py-6 lg:py-12 max-w-7xl">
-          <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-            {/* Right CONTENT */}
-            <div className="w-full lg:w-1/3 order-1 lg:order-2 hidden md:block">
-              <div className="lg:sticky lg:top-24 border border-gray-100 rounded-2xl shadow-xl bg-white overflow-hidden">
-                <div className="relative w-full aspect-video bg-gray-100 rounded-xl overflow-hidden">
+   <UserLayout>
+  {showShareModal && <ShareModal course={course} onClose={() => setShowShareModal(false)} />}
+  <div className="min-h-screen bg-white font-sans text-[#1c1d1f]">
+    <div className="mx-auto px-4 sm:px-6 py-6 lg:py-12 max-w-7xl">
+      <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
+        {/* RIGHT CONTENT - Sidebar (Sticky with independent scroll) */}
+        <div className="w-full lg:w-1/3 order-1 lg:order-2 relative">
+          <div className="lg:sticky lg:top-24 max-h-[calc(100vh-2rem)] lg:max-h-[calc(100vh-6rem)] overflow-y-auto custom-scrollbar">
+            <div className="border border-gray-100 rounded-2xl shadow-xl bg-white overflow-hidden">
+              <div className="relative w-full aspect-video bg-gray-100 rounded-xl overflow-hidden">
+                <img
+                  src={course.image}
+                  alt={course.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="p-6">
+                <PriceSection />
+                
+                <div className="flex items-center justify-between mb-4">
+                  <ActionButton />
+                  <button onClick={() => setShowShareModal(true)} className="ml-3 p-3 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all">
+                    <FaRegShareSquare size={20} className="text-gray-600" />
+                  </button>
+                </div>
+                
+                <div className="mt-8 space-y-4">
+                  <h5 className="font-bold text-sm uppercase tracking-widest text-gray-400">Includes:</h5>
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 text-sm font-bold text-gray-600">
+                    {course?.includes?.map((p, i) => <li key={i} className="flex items-start gap-3"><FaCheck className="text-green-500 mt-1" /> {p.text}</li>)}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* MAIN CONTENT - Left side with independent scroll */}
+        <div className="w-full lg:w-2/3 order-2 lg:order-1 max-h-[calc(100vh-2rem)] lg:max-h-[calc(100vh-6rem)] overflow-y-auto custom-scrollbar pr-0 lg:pr-4">
+          {/* Video Player Section */}
+          {course?.video_url && (
+            <div className="relative aspect-video bg-black rounded-2xl overflow-hidden">
+              <video
+                ref={videoRef}
+                className="w-full h-full object-contain"
+                controls
+                autoPlay
+                muted
+                playsInline
+                preload="auto"
+                controlsList="nodownload noplaybackrate"
+                disablePictureInPicture
+              />
+              {videoError && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/80">
+                  <div className="text-center text-white">
+                    <p className="text-lg font-semibold mb-2">Unable to load video</p>
+                    <p className="text-sm text-gray-400">Please try again later or contact support</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          
+          {/* Mobile Sidebar */}
+          <div className="w-full lg:w-1/3 md:hidden order-1 lg:order-2">
+            <div className="lg:sticky lg:top-24 border border-gray-100 rounded-2xl shadow-xl bg-white overflow-hidden mt-6">
+              <div className="p-3">
+                <div className="relative w-full aspect-video bg-gray-100 rounded-xl overflow-hidden mb-2">
                   <img
                     src={course.image}
                     alt={course.title}
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <div className="p-6">
-                  <div className="flex items-center gap-3 mb-6 flex-wrap">
-                    {isFreeCourse ? (
-                      <span className="text-2xl font-black text-green-600 uppercase">
-                        FREE
-                      </span>
-                    ) : (
-                      <>
-                        {hasDiscount && (
-                          <span className="line-through text-gray-400 text-lg">
-                            ₹{course.price}
-                          </span>
-                        )}
-                        <h2 className="text-3xl font-black text-gray-900">
-                          ₹{finalAmount}
-                        </h2>
-                      </>
-                    )}
-                    <div className="ml-auto flex gap-4 text-xs font-bold text-gray-500">
-                      {/* <button className="flex items-center gap-1 text-cyan-500"><FaTags/> Promo</button> */}
-                      <button onClick={() => setShowShareModal(true)} className="flex items-center gap-1"><FaRegShareSquare /> Share</button>
-                    </div>
-                  </div>
-                  {/* ⭐ BUTTON LOGIC ⭐ */}
-                  {course.price === 0 || course.is_premium === false ? (
-                    // ✅ FREE COURSE
-                    isEnrolled ? (
-                      <button
-                        onClick={() => navigate(`/course-content/${course._id}`)}
-                        className="w-full bg-cyan-500 hover:bg-cyan-600 text-white py-4 rounded-xl font-black text-lg transition-all uppercase shadow-lg shadow-cyan-100"
-                      >
-                        Continue Learning
-                      </button>
-                    ) : (
-                      <button
-                        onClick={handleEnrollCourse}
-                        className="w-full bg-cyan-500 hover:bg-cyan-600 text-white py-4 rounded-xl font-black text-lg transition-all uppercase shadow-lg shadow-cyan-100"
-                      >
-                        Enroll Now (Free)
-                      </button>
-                    )
-                  ) : isEnrolled ? (
-                    // ✅ PAID COURSE → ALREADY ENROLLED
-                    <button
-                      onClick={() => navigate(`/course-content/${course._id}`)}
-                      className="w-full bg-cyan-500 hover:bg-cyan-600 text-white py-4 rounded-xl font-black text-lg transition-all uppercase shadow-lg shadow-cyan-100"
-                    >
-                      Continue Learning
-                    </button>
-                  ) : isBought ? (
-                    // ✅ PAID COURSE → BOUGHT BUT NOT ENROLLED
-                    <button
-                      onClick={handleEnrollCourse}
-                      className="w-full bg-cyan-500 hover:bg-cyan-600 text-white py-4 rounded-xl font-black text-lg transition-all uppercase shadow-lg shadow-cyan-100"
-                    >
-                      Enroll Now
-                    </button>
-                  ) : (
-                    // ❌ PAID COURSE → NOT BOUGHT
-                    <button
-                      onClick={handleBuyCourse}
-                      className="w-full bg-cyan-500 hover:bg-cyan-600 text-white py-4 rounded-xl font-black text-lg transition-all uppercase shadow-lg shadow-cyan-100"
-                    >
-                      Buy Now ₹{finalAmount}
-                    </button>
-                  )}
-                  <div className="mt-8 space-y-4">
-                    <h5 className="font-bold text-sm uppercase tracking-widest text-gray-400">Includes:</h5>
-                    <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 text-sm font-bold text-gray-600">
 
-                      {course?.includes?.map((p, i) => <li key={i} className="flex items-start gap-3"><FaCheck className="text-green-500 mt-1" /> {p.text}</li>)}
-                    </ul>
-                  </div>
+                <PriceSection />
+                
+                <div className="flex items-center justify-between mb-4">
+                  <ActionButton />
+                  <button onClick={() => setShowShareModal(true)} className="ml-3 p-3 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all">
+                    <FaRegShareSquare size={20} className="text-gray-600" />
+                  </button>
                 </div>
-              </div>
-            </div>
-
-            {/* MAIN CONTENT */}
-            <div className="w-full lg:w-2/3 order-2 lg:order-1 ">
-              {course?.video_url && (
-                <div className="relative aspect-video">
-                  <video
-                    ref={videoRef}
-                    className="w-full h-full md:rounded-2xl rounded-t-2xl object-cover"
-                    controls
-                    autoPlay
-                    muted
-                    playsInline
-                    preload="auto"
-                    controlsList="nodownload noplaybackrate"
-                    disablePictureInPicture
-                  />
-                </div>
-              )}
-              <div className="w-full lg:w-1/3 md:hidden order-1 lg:order-2">
-                <div className="lg:sticky lg:top-24 border border-gray-100 rounded-b-2xl shadow-xl bg-white overflow-hidden">
-                  <div className="p-6">
-                    <div className="flex items-center gap-3 mb-6 flex-wrap">
-                      {isFreeCourse ? (
-                        <span className="text-2xl font-black text-green-600 uppercase">
-                          FREE
-                        </span>
-                      ) : (
-                        <>
-                          {hasDiscount && (
-                            <span className="line-through text-gray-400 text-lg">
-                              ₹{course.price}
-                            </span>
-                          )}
-                          <h2 className="text-3xl font-black text-gray-900">
-                            ₹{finalAmount}
-                          </h2>
-                        </>
-                      )}
-                      <div className="ml-auto flex gap-4 text-xs font-bold text-gray-500">
-                        {/* <button className="flex items-center gap-1 text-cyan-500"><FaTags/> Promo</button> */}
-                        <button onClick={() => setShowShareModal(true)} className="flex items-center gap-1"><FaRegShareSquare /> Share</button>
-                      </div>
-                    </div>
-                    {/* ⭐ BUTTON LOGIC ⭐ */}
-                    {course.price === 0 || course.is_premium === false ? (
-                      // ✅ FREE COURSE
-                      isEnrolled ? (
-                        <button
-                          onClick={() => navigate(`/course-content/${course._id}`)}
-                          className="w-full bg-cyan-500 hover:bg-cyan-600 text-white py-4 rounded-xl font-black text-lg transition-all uppercase shadow-lg shadow-cyan-100"
-                        >
-                          Continue Learning
-                        </button>
-                      ) : (
-                        <button
-                          onClick={handleEnrollCourse}
-                          className="w-full bg-cyan-500 hover:bg-cyan-600 text-white py-4 rounded-xl font-black text-lg transition-all uppercase shadow-lg shadow-cyan-100"
-                        >
-                          Enroll Now (Free)
-                        </button>
-                      )
-                    ) : isEnrolled ? (
-                      // ✅ PAID COURSE → ALREADY ENROLLED
-                      <button
-                        onClick={() => navigate(`/course-content/${course._id}`)}
-                        className="w-full bg-cyan-500 hover:bg-cyan-600 text-white py-4 rounded-xl font-black text-lg transition-all uppercase shadow-lg shadow-cyan-100"
-                      >
-                        Continue Learning
-                      </button>
-                    ) : isBought ? (
-                      // ✅ PAID COURSE → BOUGHT BUT NOT ENROLLED
-                      <button
-                        onClick={handleEnrollCourse}
-                        className="w-full bg-cyan-500 hover:bg-cyan-600 text-white py-4 rounded-xl font-black text-lg transition-all uppercase shadow-lg shadow-cyan-100"
-                      >
-                        Enroll Now
-                      </button>
-                    ) : (
-                      // ❌ PAID COURSE → NOT BOUGHT
-                      <button
-                        onClick={handleBuyCourse}
-                        className="w-full bg-cyan-500 hover:bg-cyan-600 text-white py-4 rounded-xl font-black text-lg transition-all uppercase shadow-lg shadow-cyan-100"
-                      >
-                        Buy Now ₹{finalAmount}
-                      </button>
-                    )}
-                    <div className="mt-8 space-y-4">
-                      <h5 className="font-bold text-sm uppercase tracking-widest text-gray-400">Includes:</h5>
-                      <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 text-sm font-bold text-gray-600">
-
-                        {course?.includes?.map((p, i) => <li key={i} className="flex items-start gap-3"><FaCheck className="text-green-500 mt-1" /> {p.text}</li>)}
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <h1 className="text-2xl sm:text-4xl mt-6 md:mt-0 font-black mb-4 leading-tight">{course.title}</h1>
-              <p className="text-gray-500 text-lg mb-8 leading-relaxed">{course.short_description}</p>
-
-              <div className="bg-gray-50 rounded-2xl p-6 sm:p-8 mb-10 border border-gray-100">
-                <h4 className="text-xl font-black mb-6 uppercase tracking-tight">What you'll learn</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {learnPoints?.map((l, i) => (
-                    <div key={i} className="flex items-start gap-3 text-sm sm:text-base">
-                      <FaCheck className="text-cyan-500 mt-1 shrink-0" />
-                      <span className="text-gray-700 font-medium">{l}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* CURRICULUM */}
-              <div className="mb-10">
-                <h4 className="text-2xl font-black mb-6">Course Content</h4>
-                <div className="border border-gray-200 rounded-2xl overflow-hidden">
-                  {courseContent.map((content) => (
-                    <div key={content._id} className="border-b border-gray-200 last:border-none">
-                      <button onClick={() => toggleSection(content._id)} className="w-full p-5 flex justify-between items-center bg-white hover:bg-gray-50 transition-all">
-                        <div className="text-left">
-                          <span className="font-bold text-gray-900 block">{content.title}</span>
-                          <span className="text-[10px] font-black text-gray-400 uppercase">{content.videos?.length} Lectures</span>
-                        </div>
-                        {expandedSections.has(content._id) ? <FaChevronUp /> : <FaChevronDown />}
-                      </button>
-                      {expandedSections.has(content._id) && (
-                        <div className="bg-gray-50/50 p-2">
-                          {content.videos.map((v, i) => (
-                            <div key={i} className="flex items-center gap-4 p-4 hover:bg-white rounded-xl transition-all cursor-default">
-                              <FaPlayCircle className="text-gray-300" />
-                              <span className="text-sm font-medium text-gray-700">{v.video_title}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* DYNAMIC REVIEWS */}
-              <div className="mt-16">
-                <h3 className="text-2xl font-black mb-8">Student Feedback</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-white p-8 rounded-3xl border-2 border-gray-50">
-                  <div className="text-center md:text-left">
-                    <div className="text-6xl font-black text-gray-900">{calculatedAverage}<span className="text-2xl text-gray-300">/5</span></div>
-                    <div className="mt-4 flex justify-center md:justify-start"><RatingStars rating={Math.round(Number(calculatedAverage))} /></div>
-                    <p className="text-xs font-black text-gray-400 uppercase mt-2 tracking-widest">{totalReviewsCount} Total Ratings</p>
-                  </div>
-                  <div className="space-y-3">
-                    {getDistributionData().map((item, i) => (
-                      <div key={i} className="flex items-center gap-3 text-xs font-bold text-gray-500">
-                        <div className="w-8">{item.star}★</div>
-                        <div className="flex-1"><ProgressBar value={item.percentage} /></div>
-                        <div className="w-4 text-right">{item.count}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="mt-12 space-y-8">
-                  {reviews?.map((rev, i) => (
-                    <div key={i} className="border-b border-gray-50 pb-8 last:border-none">
-                      <RatingStars rating={rev.rating} />
-                      <p className="font-black text-gray-900 mt-2">{rev.reviewer_name || "Course Student"}</p>
-                      <p className="text-gray-500 mt-1 italic text-sm">"{rev.review}"</p>
-                    </div>
-                  ))}
-                </div>
-
-                {/* REVIEW FORM */}
-                <div className="mt-12 bg-cyan-50/50 p-8 rounded-[2rem] border border-cyan-100">
-                  <h4 className="font-black text-gray-900 mb-4">Add your experience</h4>
-                  <div className="flex gap-2 mb-6">
-                    {[1, 2, 3, 4, 5].map(n => <FaStar key={n} onClick={() => setRating(n)} className={`size-8 cursor-pointer transition-all ${rating >= n ? 'text-yellow-400' : 'text-gray-200'}`} />)}
-                  </div>
-                  <textarea value={reviewText} onChange={(e) => setReviewText(e.target.value)} rows={4} className="w-full bg-white rounded-2xl p-4 outline-none border border-cyan-100 focus:ring-2 ring-cyan-500/20" placeholder="What did you love about this course?" />
-                  <button onClick={handleReviewSubmit} className="mt-4 bg-gray-900 text-white px-8 py-3 rounded-xl font-black uppercase text-xs tracking-widest hover:bg-cyan-500 transition-all">Post Review</button>
+                
+                <div className="mt-8 space-y-4">
+                  <h5 className="font-bold text-sm uppercase tracking-widest text-gray-400">Includes:</h5>
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 text-sm font-bold text-gray-600">
+                    {course?.includes?.map((p, i) => <li key={i} className="flex items-start gap-3"><FaCheck className="text-green-500 mt-1" /> {p.text}</li>)}
+                  </ul>
                 </div>
               </div>
             </div>
           </div>
+
+          <h1 className="text-2xl sm:text-4xl mt-6 md:mt-0 font-black mb-4 leading-tight">{course.title}</h1>
+          <p className="text-gray-500 text-lg mb-8 leading-relaxed">{course.short_description}</p>
+
+          <div className="bg-gray-50 rounded-2xl p-6 sm:p-8 mb-10 border border-gray-100">
+            <h4 className="text-xl font-black mb-6 uppercase tracking-tight">What you'll learn</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {learnPoints?.map((l, i) => (
+                <div key={i} className="flex items-start gap-3 text-sm sm:text-base">
+                  <FaCheck className="text-cyan-500 mt-1 shrink-0" />
+                  <span className="text-gray-700 font-medium">{l}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* CURRICULUM */}
+          <div className="mb-10">
+            <h4 className="text-2xl font-black mb-6">Course Content</h4>
+            <div className="border border-gray-200 rounded-2xl overflow-hidden">
+              {courseContent.map((content) => (
+                <div key={content._id} className="border-b border-gray-200 last:border-none">
+                  <button onClick={() => toggleSection(content._id)} className="w-full p-5 flex justify-between items-center bg-white hover:bg-gray-50 transition-all">
+                    <div className="text-left">
+                      <span className="font-bold text-gray-900 block">{content.title}</span>
+                      <span className="text-[10px] font-black text-gray-400 uppercase">{content.videos?.length} Lectures</span>
+                    </div>
+                    {expandedSections.has(content._id) ? <FaChevronUp /> : <FaChevronDown />}
+                  </button>
+                  {expandedSections.has(content._id) && (
+                    <div className="bg-gray-50/50 p-2">
+                      {content.videos.map((v, i) => (
+                        <div key={i} className="flex items-center gap-4 p-4 hover:bg-white rounded-xl transition-all cursor-default">
+                          <FaPlayCircle className="text-gray-300" />
+                          <span className="text-sm font-medium text-gray-700">{v.video_title}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* DYNAMIC REVIEWS */}
+          <div className="mt-16">
+            <h3 className="text-2xl font-black mb-8">Student Feedback</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-white p-8 rounded-3xl border-2 border-gray-50">
+              <div className="text-center md:text-left">
+                <div className="text-6xl font-black text-gray-900">{calculatedAverage}<span className="text-2xl text-gray-300">/5</span></div>
+                <div className="mt-4 flex justify-center md:justify-start"><RatingStars rating={Math.round(Number(calculatedAverage))} /></div>
+                <p className="text-xs font-black text-gray-400 uppercase mt-2 tracking-widest">{totalReviewsCount} Total Ratings</p>
+              </div>
+              <div className="space-y-3">
+                {getDistributionData().map((item, i) => (
+                  <div key={i} className="flex items-center gap-3 text-xs font-bold text-gray-500">
+                    <div className="w-8">{item.star}★</div>
+                    <div className="flex-1"><ProgressBar value={item.percentage} /></div>
+                    <div className="w-4 text-right">{item.count}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-12 space-y-8">
+              {reviews?.map((rev, i) => (
+                <div key={i} className="border-b border-gray-50 pb-8 last:border-none">
+                  <RatingStars rating={rev.rating} />
+                  <p className="font-black text-gray-900 mt-2">{rev.reviewer_name || "Course Student"}</p>
+                  <p className="text-gray-500 mt-1 italic text-sm">"{rev.review}"</p>
+                </div>
+              ))}
+            </div>
+
+            {/* REVIEW FORM */}
+            <div className="mt-12 bg-cyan-50/50 p-8 rounded-[2rem] border border-cyan-100">
+              <h4 className="font-black text-gray-900 mb-4">Add your experience</h4>
+              <div className="flex gap-2 mb-6">
+                {[1, 2, 3, 4, 5].map(n => <FaStar key={n} onClick={() => setRating(n)} className={`size-8 cursor-pointer transition-all ${rating >= n ? 'text-yellow-400' : 'text-gray-200'}`} />)}
+              </div>
+              <textarea value={reviewText} onChange={(e) => setReviewText(e.target.value)} rows={4} className="w-full bg-white rounded-2xl p-4 outline-none border border-cyan-100 focus:ring-2 ring-cyan-500/20" placeholder="What did you love about this course?" />
+              <button onClick={handleReviewSubmit} className="mt-4 bg-gray-900 text-white px-8 py-3 rounded-xl font-black uppercase text-xs tracking-widest hover:bg-cyan-500 transition-all">Post Review</button>
+            </div>
+          </div>
         </div>
       </div>
-    </UserLayout>
+    </div>
+  </div>
+
+  {/* Custom CSS for independent scrolling */}
+  <style jsx>{`
+    .custom-scrollbar {
+      scrollbar-width: thin;
+      scrollbar-color: #cbd5e1 #f1f5f9;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 10px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 10px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  `}</style>
+</UserLayout>
   );
 };
 

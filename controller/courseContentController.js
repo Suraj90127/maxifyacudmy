@@ -250,3 +250,92 @@ exports.updateCourseContent = async (req, res) => {
     res.status(500).json({ message: "Unexpected error", error: error.message });
   }
 };
+
+
+exports.downloadVideoPdf = async (req, res) => {
+  try {
+    const { contentId, videoId } = req.params;
+
+    const content = await CourseContent.findById(contentId);
+
+    if (!content) {
+      return res.status(404).json({
+        success: false,
+        message: "Content not found",
+      });
+    }
+
+    const video = content.videos.find(
+      (v) => v._id.toString() === videoId.toString()
+    );
+
+    if (!video) {
+      return res.status(404).json({
+        success: false,
+        message: "Video not found",
+      });
+    }
+
+    if (!video.pdf_path || !video.pdf_path.trim()) {
+      return res.status(404).json({
+        success: false,
+        message: "PDF not found",
+      });
+    }
+
+    const pdfUrl = video.pdf_path;
+
+    // Safe filename (emoji & invalid chars remove)
+    const safeFileName = `${video.video_title
+      .replace(/[^\w\s()-]/g, "")
+      .replace(/\s+/g, "_")
+      .trim()}.pdf`;
+
+    console.log("Download filename:", safeFileName);
+
+    console.log("DOWNLOAD CONTROLLER HIT");
+    console.log("Filename:", safeFileName);
+
+    const response = await axios.get(pdfUrl, {
+      responseType: "stream",
+    });
+
+    res.setHeader(
+      "Access-Control-Expose-Headers",
+      "Content-Disposition"
+    );
+
+    res.setHeader("Content-Type", "application/pdf");
+
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${safeFileName}"`
+    );
+    if (response.headers["content-length"]) {
+      res.setHeader(
+        "Content-Length",
+        response.headers["content-length"]
+      );
+    }
+
+    response.data.pipe(res);
+
+    response.data.on("error", (err) => {
+      console.error("PDF Stream Error:", err);
+
+      if (!res.headersSent) {
+        return res.status(500).json({
+          success: false,
+          message: "PDF stream failed",
+        });
+      }
+    });
+  } catch (error) {
+    console.error("PDF Download Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};

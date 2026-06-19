@@ -10,6 +10,8 @@ const CoursePurchase = require("../models/coursePurchaseModel");
 const generateRandomPassword = require("../utils/generatePassword");
 const { sendLoginCredentials } = require("../utils/emailService");
 const createToken = require("../utils/createToken");
+const EmailQueue = require("../models/EmailQueue");
+
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -266,11 +268,11 @@ exports.createPurchase = async (req, res) => {
       });
 
       // ✅ Send email (non-blocking best practice)
-      sendLoginCredentials(
-        user.email,
-        tempUser.plain_password
-      ).catch((err) => console.error("Email error:", err));
-
+      await EmailQueue.create({
+        email: user.email,
+        password: tempUser.plain_password,
+        status: "pending",
+      });
       // ✅ Delete temp user
       await TempUser.deleteOne({ _id: tempUser._id });
     }

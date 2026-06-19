@@ -1,246 +1,59 @@
-// import React, { useState } from 'react';
-// import UserLayout from '../../Layouts/UserLayout';
-// import { useDispatch, useSelector } from "react-redux";
-// import { sendMessage } from "../../redux/slices/contactSlice";
-// import { useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
-// const ContactPage = () => {
-//   useEffect(() => {
-//     window.scroll(0, 0)
-//   })
-//   const dispatch = useDispatch();
-//   const { loading } = useSelector((state) => state.contact);
+import UserLayout from "../../Layouts/UserLayout";
 
-//   const user = JSON.parse(localStorage.getItem("user")); // Check if user exists
-
-//   const isLoggedIn = !!user; // true/false
-
-//   const contactData = {
-//     header: "Get in Touch",
-//     subheader: "Have questions? We're here to help. Send us a message and we'll respond as soon as possible.",
-//     contact_details: "1234 Business Street, Suite 567, San Francisco, CA 94107",
-//     email_instruction: "Send us an email for any inquiries",
-//     email_address: "support@example.com",
-//     mobile_instruction: "Call us during business hours (9am-5pm PST)",
-//     contact_number: "+1 (555) 123-4567"
-//   };
-
-//   const [formData, setFormData] = useState({
-//     name: isLoggedIn ? user.firstname : "",
-//     email: isLoggedIn ? user.email : "",
-//     subject: "",
-//     message: "",
-//   });
-
-//   const [submitSuccess, setSubmitSuccess] = useState(false);
-
-//   const handleInputChange = (e) => {
-//     const { name, value } = e.target;
-//     setFormData(prev => ({ ...prev, [name]: value }));
-//   };
-
-//   const handleSubmit = (e) => {
-//     e.preventDefault();
-
-//     dispatch(sendMessage(formData))
-//       .unwrap()
-//       .then(() => {
-//         setSubmitSuccess(true);
-
-//         setFormData(prev => ({
-//           ...prev,
-//           subject: "",
-//           message: "",
-//         }));
-
-//         setTimeout(() => setSubmitSuccess(false), 5000);
-//       })
-//       .catch(() => {
-//         alert("Something went wrong");
-//       });
-//   };
-
-//   return (
-//     <UserLayout>
-//       <main>
-//         <section className="py-12 bg-gradient-to-b from-gray-50 to-white">
-//           <div className="container mx-auto px-4 max-w-7xl">
-
-//             <div className="text-center mb-12">
-//               <h1 className="text-3xl md:text-4xl font-bold">{contactData.header}</h1>
-//               <p className="text-lg text-gray-600 max-w-2xl mx-auto">{contactData.subheader}</p>
-//             </div>
-
-//             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-
-//               {/* LEFT: FORM */}
-//               <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8">
-//                 {submitSuccess && (
-//                   <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex">
-//                     <div className="text-green-500 mr-3">✔</div>
-//                     <div>
-//                       <p className="font-semibold text-green-800">Message sent successfully</p>
-//                       <p className="text-green-600 text-sm">We will respond soon</p>
-//                     </div>
-//                   </div>
-//                 )}
-
-//                 <form onSubmit={handleSubmit} className="space-y-6">
-
-//                   {/* NAME */}
-//                   <div>
-//                     <label className="block font-semibold text-gray-700 mb-2">Name</label>
-//                     <input
-//                       type="text"
-//                       name="name"
-//                       value={formData.name}
-//                       onChange={handleInputChange}
-//                       className={`w-full p-2 rounded-xl border ${isLoggedIn ? "bg-gray-50" : "bg-white"}`}
-//                       readOnly={isLoggedIn}
-//                       required
-//                     />
-
-//                     {isLoggedIn && (
-//                       <p className="text-xs text-gray-500 mt-1">
-//                         Prefilled from your account
-//                       </p>
-//                     )}
-//                   </div>
-
-//                   {/* EMAIL */}
-//                   <div>
-//                     <label className="block font-semibold text-gray-700 mb-2">Email</label>
-//                     <input
-//                       type="email"
-//                       name="email"
-//                       value={formData.email}
-//                       onChange={handleInputChange}
-//                       className={`w-full p-2 rounded-xl border ${isLoggedIn ? "bg-gray-50" : "bg-white"}`}
-//                       readOnly={isLoggedIn}
-//                       required
-//                     />
-//                   </div>
-
-//                   {/* SUBJECT */}
-//                   <div>
-//                     <label className="block font-semibold text-gray-700 mb-2">Subject</label>
-//                     <input
-//                       type="text"
-//                       name="subject"
-//                       value={formData.subject}
-//                       onChange={handleInputChange}
-//                       className="w-full p-2 rounded-xl border"
-//                       required
-//                     />
-//                   </div>
-
-//                   {/* MESSAGE */}
-//                   <div>
-//                     <label className="block font-semibold text-gray-700 mb-2">Message</label>
-//                     <textarea
-//                       name="message"
-//                       value={formData.message}
-//                       onChange={handleInputChange}
-//                       rows="5"
-//                       className="w-full p-2 rounded-xl border"
-//                       required
-//                     ></textarea>
-//                   </div>
-
-//                   <button
-//                     type="submit"
-//                     disabled={loading}
-//                     className={`w-full mt-4 py-3 px-6 rounded-xl font-semibold bg-[#003366] text-white ${loading ? "opacity-75 cursor-not-allowed" : "hover:bg-[#003366]/90"
-//                       }`}
-//                   >
-//                     {loading ? "Sending..." : "Submit Message"}
-//                   </button>
-
-//                 </form>
-//               </div>
-
-//               {/* RIGHT: CONTACT INFO */}
-//               {/* RIGHT: CONTACT INFO */}
-//               <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8">
-
-//                 <div className="mb-8 pb-8 border-b border-gray-100">
-//                   <h5 className="text-lg font-bold text-gray-900 mb-2">Merchant Legal Entity Name</h5>
-//                   <p className="text-gray-600">Maxify Academy</p>
-//                 </div>
-
-//                 <div className="mb-8 pb-8 border-b border-gray-100">
-//                   <h5 className="text-lg font-bold text-gray-900 mb-2">Registered Address</h5>
-//                   <p className="text-gray-600">
-//                     garhi khaira jamui, Jamui, BIHAR 811317
-//                   </p>
-//                 </div>
-
-//                 <div className="mb-8 pb-8 border-b border-gray-100">
-//                   <h5 className="text-lg font-bold text-gray-900 mb-2">Operational Address</h5>
-//                   <p className="text-gray-600">
-//                     garhi khaira jamui, Jamui, BIHAR 811317
-//                   </p>
-//                 </div>
-
-//                 <div className="mb-8 pb-8 border-b border-gray-100">
-//                   <h5 className="text-lg font-bold text-gray-900 mb-2">Telephone</h5>
-//                   <a
-//                     href="tel:+917033976030"
-//                     className="text-[#003366] font-medium"
-//                   >
-//                     7033976030
-//                   </a>
-//                 </div>
-
-//                 <div className="mb-8">
-//                   <h5 className="text-lg font-bold text-gray-900 mb-2">Email Us</h5>
-//                   <a
-//                     href="mailto:support@maxifyacademy.com"
-//                     className="text-[#003366] font-medium"
-//                   >
-//                     support@maxifyacademy.com
-//                   </a>
-//                 </div>
-
-//               </div>
-
-
-//             </div>
-//           </div>
-//         </section>
-//       </main>
-//     </UserLayout>
-//   );
-// };
-
-// export default ContactPage;
-
-
-import React, { useState, useEffect } from 'react';
-import UserLayout from '../../Layouts/UserLayout';
 import { useDispatch, useSelector } from "react-redux";
+
 import { sendMessage } from "../../redux/slices/contactSlice";
-import { 
-  FaMapMarkerAlt, 
-  FaPhoneAlt, 
-  FaEnvelope, 
-  FaBuilding, 
+
+import {
+  FaMapMarkerAlt,
+  FaPhoneAlt,
+  FaEnvelope,
+  FaInstagram,
+  FaTwitter,
+  FaLinkedinIn,
+  FaYoutube,
+  FaPaperPlane,
+  FaClock,
   FaCheckCircle,
-  FaHeadset
-} from 'react-icons/fa';
+  FaHeadset,
+  FaRegSmile,
+  FaRocket,
+  FaBuilding,
+} from "react-icons/fa";
+
 import { toast } from "react-toastify";
+import { motion } from "framer-motion";
+import { Star } from "lucide-react";
 
 const ContactPage = () => {
+  // =========================================
+  // SCROLL TOP
+  // =========================================
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
+  // =========================================
+  // REDUX
+  // =========================================
+
   const dispatch = useDispatch();
   const { loading } = useSelector((state) => state.contact);
+
+  // =========================================
+  // USER DATA
+  // =========================================
 
   const userString = localStorage.getItem("user");
   const user = userString ? JSON.parse(userString) : null;
   const isLoggedIn = !!user;
+
+  // =========================================
+  // STATES
+  // =========================================
 
   const [formData, setFormData] = useState({
     name: isLoggedIn ? user.firstname : "",
@@ -251,19 +64,31 @@ const ContactPage = () => {
 
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
+  // =========================================
+  // INPUT CHANGE
+  // =========================================
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
+
+  // =========================================
+  // SUBMIT FORM
+  // =========================================
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
     dispatch(sendMessage(formData))
       .unwrap()
       .then(() => {
         setSubmitSuccess(true);
         toast.success("Message sent successfully!");
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
           subject: "",
           message: "",
@@ -277,188 +102,400 @@ const ContactPage = () => {
 
   return (
     <UserLayout>
-      <div className="min-h-screen bg-white font-sans text-[#1c1d1f]">
-        
-        {/* Header Section */}
-        <div className="bg-gray-50 border-b border-gray-100">
-          <div className="max-w-7xl mx-auto py-16 px-4 md:px-6 text-center lg:text-left">
-            <h1 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight">
-              Get in <span className="text-cyan-500">Touch</span>
-            </h1>
-            <p className="text-gray-500 mt-4 text-lg max-w-2xl font-medium mx-auto lg:mx-0">
-              Have questions or need technical assistance? Our team is here to support your learning journey.
-            </p>
+      <div className="min-h-screen bg-gradient-to-br from-white via-blue-50 to-indigo-50 overflow-hidden">
+        {/* ========================================= */}
+        {/* HERO SECTION - MATCHING HOME PAGE STYLE */}
+        {/* ========================================= */}
+
+        <div className="relative overflow-hidden bg-gradient-to-br from-white via-blue-50 to-indigo-50 py-12 md:py-16">
+          {/* Decorative Shapes - Like Home Page */}
+          <div className="absolute top-0 right-0 w-96 h-96 bg-purple-200 rounded-full blur-3xl opacity-20 -z-10"></div>
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-200 rounded-full blur-3xl opacity-20 -z-10"></div>
+
+          <div className="max-w-[100rem] mx-auto px-5 sm:px-6 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7 }}
+              className="text-center"
+            >
+              {/* Heading with Gradient */}
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 mb-4">
+                Get in{" "}
+                <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                  Touch
+                </span>{" "}
+                With Us
+              </h1>
+
+              <p className="text-base md:text-lg text-gray-700 max-w-2xl mx-auto">
+                Need help with courses, payments, certificates, or technical
+                support? Our team is here to help you anytime.
+                <span className="block text-sm text-purple-600 font-semibold mt-1">
+                  24/7 Student Support Available
+                </span>
+              </p>
+            </motion.div>
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto py-12 lg:py-20 px-4 md:px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
+        {/* ========================================= */}
+        {/* MAIN SECTION */}
+        {/* ========================================= */}
 
-            {/* LEFT: FORM SECTION */}
-            <div className="order-2 lg:order-1">
-              <div className="bg-white rounded-3xl border border-gray-100 shadow-2xl shadow-gray-100 p-8 md:p-10">
-                <h3 className="text-2xl font-black text-gray-900 mb-8 flex items-center gap-3">
-                  <FaHeadset className="text-cyan-500" /> Send a Message
-                </h3>
+        <div className="max-w-[95rem] mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+          <div className="grid lg:grid-cols-2 gap-12">
+            {/* ========================================= */}
+            {/* LEFT SIDE - CONTACT INFO - UPDATED */}
+            {/* ========================================= */}
 
-                {submitSuccess && (
-                  <div className="mb-8 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center gap-4 animate-fade-in">
-                    <FaCheckCircle className="text-emerald-500 text-xl" />
-                    <div>
-                      <p className="font-bold text-emerald-900">Message Delivered</p>
-                      <p className="text-emerald-700 text-sm font-medium">We'll get back to you within 24 hours.</p>
-                    </div>
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+            >
+              {/* TITLE */}
+              <div className="mb-10">
+                <div className="inline-flex items-center gap-2 bg-purple-50 px-3 py-1 rounded-full mb-4">
+                  <FaHeadset size={14} className="text-purple-600" />
+                  <span className="text-xs font-semibold text-purple-600 uppercase tracking-wide">
+                    Contact Information
+                  </span>
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+                  Let's{" "}
+                  <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                    Connect
+                  </span>
+                </h2>
+                <p className="text-gray-500 mt-3 text-lg">
+                  Reach out through any of these official channels.
+                </p>
+              </div>
+
+              {/* INFO BOXES - With Hover Effects Like Home Page */}
+              <div className="space-y-4 sm:space-y-5 w-full">
+                {/* LEGAL */}
+                <motion.div
+                  whileHover={{ y: -4 }}
+                  transition={{ duration: 0.3 }}
+                  className="group w-full bg-white rounded-2xl border border-gray-100 shadow-md hover:shadow-premium transition-all duration-300 p-4 sm:p-6 flex items-start gap-4 overflow-hidden"
+                >
+                  <div className="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-r from-purple-100 to-indigo-100 flex items-center justify-center text-purple-600 group-hover:from-purple-600 group-hover:to-blue-600 group-hover:text-white transition-all">
+                    <FaBuilding size={20} />
                   </div>
+
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-1">
+                      Legal Entity
+                    </p>
+
+                    <h4 className="text-lg sm:text-xl font-bold text-gray-900 break-words">
+                      Maxify Academy
+                    </h4>
+                  </div>
+                </motion.div>
+
+                {/* ADDRESS */}
+                <motion.div
+                  whileHover={{ y: -4 }}
+                  transition={{ duration: 0.3 }}
+                  className="group w-full bg-white rounded-2xl border border-gray-100 shadow-md hover:shadow-premium transition-all duration-300 p-4 sm:p-6 flex items-start gap-4 overflow-hidden"
+                >
+                  <div className="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-r from-purple-100 to-indigo-100 flex items-center justify-center text-purple-600 group-hover:from-purple-600 group-hover:to-blue-600 group-hover:text-white transition-all">
+                    <FaMapMarkerAlt size={20} />
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-1">
+                      Location
+                    </p>
+
+                    <h4 className="text-base sm:text-lg font-bold text-gray-900 leading-relaxed break-words">
+                      Noida sector 2, Block D, Near Metro Noida Sector -15, (201301)
+                    </h4>
+                  </div>
+                </motion.div>
+
+                {/* PHONE */}
+                <motion.div
+                  whileHover={{ y: -4 }}
+                  transition={{ duration: 0.3 }}
+                  className="group w-full bg-white rounded-2xl border border-gray-100 shadow-md hover:shadow-premium transition-all duration-300 p-4 sm:p-6 flex items-start gap-4 overflow-hidden"
+                >
+                  <div className="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-r from-purple-100 to-indigo-100 flex items-center justify-center text-purple-600 group-hover:from-purple-600 group-hover:to-blue-600 group-hover:text-white transition-all">
+                    <FaPhoneAlt size={18} />
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-1">
+                      Call Us
+                    </p>
+
+                    <a
+                      href="tel:+919310328928"
+                      className="block text-base sm:text-xl font-bold text-gray-900 hover:text-purple-600 transition-colors break-all"
+                    >
+                      +91 93103 28928
+                    </a>
+                  </div>
+                </motion.div>
+
+                {/* EMAIL */}
+                <motion.div
+                  whileHover={{ y: -4 }}
+                  transition={{ duration: 0.3 }}
+                  className="group w-full bg-white rounded-2xl border border-gray-100 shadow-md hover:shadow-premium transition-all duration-300 p-4 sm:p-6 flex items-start gap-4 overflow-hidden"
+                >
+                  <div className="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-r from-purple-100 to-indigo-100 flex items-center justify-center text-purple-600 group-hover:from-purple-600 group-hover:to-blue-600 group-hover:text-white transition-all">
+                    <FaEnvelope size={18} />
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-1">
+                      Email Us
+                    </p>
+
+                    <a
+                      href="mailto:support@maxifyacademy.com"
+                      className="block text-sm sm:text-xl font-bold text-gray-900 hover:text-purple-600 transition-colors break-all"
+                    >
+                      support@maxifyacademy.com
+                    </a>
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* SOCIAL LINKS - UPDATED */}
+              <div className="mt-8 bg-white rounded-2xl border border-gray-100 shadow-md p-6">
+                <h4 className="text-lg font-bold text-gray-900 mb-5">
+                  Connect With Us
+                </h4>
+                <div className="flex gap-3">
+                  {[
+                    {
+                      Icon: FaInstagram,
+                      color:
+                        "hover:bg-gradient-to-r from-purple-600 to-pink-600",
+                    },
+                    {
+                      Icon: FaTwitter,
+                      color:
+                        "hover:bg-gradient-to-r from-purple-600 to-blue-600",
+                    },
+                    {
+                      Icon: FaLinkedinIn,
+                      color:
+                        "hover:bg-gradient-to-r from-purple-600 to-blue-600",
+                    },
+                    {
+                      Icon: FaYoutube,
+                      color:
+                        "hover:bg-gradient-to-r from-purple-600 to-red-600",
+                    },
+                  ].map((item, index) => (
+                    <a
+                      key={index}
+                      href="#"
+                      className={`w-12 h-12 rounded-xl bg-gray-100 ${item.color} hover:text-white flex items-center justify-center text-gray-600 transition-all duration-300 hover:scale-110 hover:shadow-lg`}
+                    >
+                      <item.Icon />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+
+            {/* ========================================= */}
+            {/* RIGHT SIDE - FORM - UPDATED */}
+            {/* ========================================= */}
+
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="bg-white rounded-2xl border border-gray-100 shadow-lg p-8 md:px-10 relative overflow-hidden"
+            >
+              {/* BG EFFECT - Purple Glow */}
+              <div className="absolute top-0 right-0 w-60 h-60 bg-purple-100 rounded-full blur-3xl opacity-30"></div>
+              <div className="absolute bottom-0 left-0 w-40 h-40 bg-blue-100 rounded-full blur-3xl opacity-30"></div>
+
+              <div className="relative z-10">
+                {/* TITLE */}
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-purple-100 to-indigo-100 flex items-center justify-center">
+                    <FaPaperPlane className="text-purple-600 text-xl" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-gray-900">
+                      Send a Message
+                    </h3>
+                    <p className="text-gray-500 text-sm">
+                      We'll get back to you within 4 hours
+                    </p>
+                  </div>
+                </div>
+
+                {/* SUCCESS MESSAGE */}
+                {submitSuccess && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="mb-8 p-5 rounded-xl bg-green-50 border border-green-100 flex gap-4"
+                  >
+                    <FaCheckCircle className="text-green-500 text-2xl mt-1" />
+                    <div>
+                      <h4 className="font-bold text-green-900">
+                        Message Delivered!
+                      </h4>
+                      <p className="text-green-700 text-sm mt-1">
+                        We'll get back to you within 24 hours.
+                      </p>
+                    </div>
+                  </motion.div>
                 )}
 
+                {/* FORM */}
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* NAME + EMAIL */}
+                  <div className="grid md:grid-cols-2 gap-5">
                     <div>
-                      <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Full Name</label>
+                      <label className="block text-xs font-semibold tracking-widest uppercase text-gray-400 mb-2">
+                        Full Name
+                      </label>
                       <input
                         type="text"
                         name="name"
                         value={formData.name}
                         onChange={handleInputChange}
-                        className={`w-full px-5 py-4 rounded-2xl border border-gray-200 outline-none transition-all focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/5 font-medium ${isLoggedIn ? "bg-gray-50 text-gray-500" : "bg-white"}`}
                         readOnly={isLoggedIn}
-                        placeholder="John Doe"
                         required
+                        placeholder="John Doe"
+                        className={`w-full px-5 py-4 rounded-xl border border-gray-200 outline-none transition-all focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 ${
+                          isLoggedIn ? "bg-gray-50 text-gray-500" : "bg-white"
+                        }`}
                       />
                     </div>
+
                     <div>
-                      <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Email Address</label>
+                      <label className="block text-xs font-semibold tracking-widest uppercase text-gray-400 mb-2">
+                        Email Address
+                      </label>
                       <input
                         type="email"
                         name="email"
                         value={formData.email}
                         onChange={handleInputChange}
-                        className={`w-full px-5 py-4 rounded-2xl border border-gray-200 outline-none transition-all focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/5 font-medium ${isLoggedIn ? "bg-gray-50 text-gray-500" : "bg-white"}`}
                         readOnly={isLoggedIn}
-                        placeholder="john@example.com"
                         required
+                        placeholder="john@example.com"
+                        className={`w-full px-5 py-4 rounded-xl border border-gray-200 outline-none transition-all focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 ${
+                          isLoggedIn ? "bg-gray-50 text-gray-500" : "bg-white"
+                        }`}
                       />
                     </div>
                   </div>
 
+                  {/* SUBJECT */}
                   <div>
-                    <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Subject</label>
+                    <label className="block text-xs font-semibold tracking-widest uppercase text-gray-400 mb-2">
+                      Subject
+                    </label>
                     <input
                       type="text"
                       name="subject"
                       value={formData.subject}
                       onChange={handleInputChange}
-                      className="w-full px-5 py-4 rounded-2xl border border-gray-200 outline-none transition-all focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/5 font-medium"
-                      placeholder="How can we help?"
                       required
+                      placeholder="How can we help?"
+                      className="w-full px-5 py-4 rounded-xl border border-gray-200 outline-none transition-all focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10"
                     />
                   </div>
 
+                  {/* MESSAGE */}
                   <div>
-                    <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Message</label>
+                    <label className="block text-xs font-semibold tracking-widest uppercase text-gray-400 mb-2">
+                      Message
+                    </label>
                     <textarea
                       name="message"
                       value={formData.message}
                       onChange={handleInputChange}
                       rows="5"
-                      className="w-full px-5 py-4 rounded-2xl border border-gray-200 outline-none transition-all focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/5 font-medium resize-none"
-                      placeholder="Describe your inquiry in detail..."
                       required
+                      placeholder="Describe your inquiry..."
+                      className="w-full px-5 py-4 rounded-xl border border-gray-200 outline-none transition-all focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 resize-none"
                     ></textarea>
                   </div>
 
+                  {/* SUBMIT BUTTON - Purple to Blue Gradient like Home Page */}
                   <button
                     type="submit"
                     disabled={loading}
-                    className={`w-full py-5 rounded-2xl font-black text-white uppercase tracking-widest transition-all shadow-xl ${
-                      loading 
-                      ? "bg-gray-300 cursor-not-allowed" 
-                      : "bg-cyan-500 hover:bg-cyan-600 shadow-cyan-100 active:scale-[0.98]"
+                    className={`group relative w-full py-5 rounded-xl text-white font-semibold uppercase tracking-wider transition-all duration-300 shadow-lg flex items-center justify-center gap-3 overflow-hidden ${
+                      loading
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-gradient-to-r from-purple-600 to-blue-600 hover:shadow-xl active:scale-[0.99]"
                     }`}
                   >
-                    {loading ? "Processing..." : "Submit Inquiry"}
+                    <span className="relative z-10">
+                      {loading ? "Processing..." : "Submit Inquiry"}
+                    </span>
+                    {!loading && (
+                      <FaPaperPlane className="relative z-10 group-hover:translate-x-1 transition-transform" />
+                    )}
+                    {!loading && (
+                      <div className="absolute inset-0 bg-gradient-to-r from-purple-700 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    )}
                   </button>
+
+                  {/* RESPONSE TIME */}
+                  <div className="flex items-center justify-center gap-2 text-sm text-gray-400">
+                    <FaClock className="text-xs" />
+                    <span>Typically replies within 4 hours</span>
+                  </div>
                 </form>
               </div>
-            </div>
-
-            {/* RIGHT: CONTACT INFO SECTION */}
-            <div className="order-1 lg:order-2 space-y-10">
-              <div>
-                <h3 className="text-2xl font-black text-gray-900 mb-6 uppercase tracking-tight flex items-center gap-2">
-                  <span className="w-2 h-6 bg-cyan-500 rounded-full"></span>
-                  Contact Information
-                </h3>
-                <p className="text-gray-500 font-medium leading-relaxed mb-10">
-                  Prefer a more direct route? Reach out via our official channels below.
-                </p>
-              </div>
-
-              <div className="grid gap-8">
-                {/* Legal Entity */}
-                <div className="flex gap-6 group">
-                  <div className="w-14 h-14 shrink-0 bg-gray-50 rounded-2xl flex items-center justify-center text-cyan-500 group-hover:bg-cyan-500 group-hover:text-white transition-all duration-300">
-                    <FaBuilding size={24} />
-                  </div>
-                  <div>
-                    <h5 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-1">Legal Entity</h5>
-                    <p className="text-lg font-bold text-gray-900">Maxify Academy</p>
-                  </div>
-                </div>
-
-                {/* Addresses */}
-                <div className="flex gap-6 group">
-                  <div className="w-14 h-14 shrink-0 bg-gray-50 rounded-2xl flex items-center justify-center text-cyan-500 group-hover:bg-cyan-500 group-hover:text-white transition-all duration-300">
-                    <FaMapMarkerAlt size={24} />
-                  </div>
-                  <div>
-                    <h5 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-1">Our Location</h5>
-                    <p className="text-lg font-bold text-gray-900 leading-snug max-w-xs">
-                      Block D, Noida sector 2, UP, 201301, India
-                    </p>
-                  </div>
-                </div>
-
-                {/* Telephone */}
-                <div className="flex gap-6 group">
-                  <div className="w-14 h-14 shrink-0 bg-gray-50 rounded-2xl flex items-center justify-center text-cyan-500 group-hover:bg-cyan-500 group-hover:text-white transition-all duration-300">
-                    <FaPhoneAlt size={22} />
-                  </div>
-                  <div>
-                    <h5 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-1">Call Support</h5>
-                    <a href="tel:+919310328928" className="text-xl font-black text-gray-900 hover:text-cyan-500 transition-colors">
-                      +91 9310328928
-                    </a>
-                  </div>
-                </div>
-
-                {/* Email */}
-                <div className="flex gap-6 group">
-                  <div className="w-14 h-14 shrink-0 bg-gray-50 rounded-2xl flex items-center justify-center text-cyan-500 group-hover:bg-cyan-500 group-hover:text-white transition-all duration-300">
-                    <FaEnvelope size={22} />
-                  </div>
-                  <div>
-                    <h5 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-1">Email Us</h5>
-                    <a href="mailto:support@maxifyacademy.com" className="text-xl font-black text-gray-900 hover:text-cyan-500 transition-colors">
-                      support@maxifyacademy.com
-                    </a>
-                  </div>
-                </div>
-              </div>
-
-              {/* Decorative Card */}
-              <div className="bg-cyan-500 rounded-3xl p-8 text-white relative overflow-hidden shadow-2xl shadow-cyan-100">
-                <div className="relative z-10">
-                  <h4 className="text-xl font-black mb-2">24/7 Support</h4>
-                  <p className="text-cyan-100 text-sm font-medium leading-relaxed">
-                    Our technical team is available around the clock to help you with course access and platform issues.
-                  </p>
-                </div>
-                <FaHeadset size={100} className="absolute -right-4 -bottom-4 text-white/10 rotate-12" />
-              </div>
-            </div>
-
+            </motion.div>
           </div>
+
+          {/* ========================================= */}
+          {/* STATS SECTION - UPDATED */}
+          {/* ========================================= */}
+
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7 }}
+            viewport={{ once: true }}
+            className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6"
+          >
+            <div className="group bg-white rounded-2xl border border-gray-100 p-8 text-center shadow-md hover:shadow-premium transition-all hover:-translate-y-1">
+              <div className="w-16 h-16 rounded-xl bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-600 group-hover:bg-gradient-to-r group-hover:from-purple-600 group-hover:to-blue-600 group-hover:text-white flex items-center justify-center mx-auto mb-4 transition-all">
+                <FaRegSmile size={28} />
+              </div>
+              <h3 className="text-4xl font-bold text-gray-900">2500+</h3>
+              <p className="text-gray-500 mt-1">Active Students</p>
+            </div>
+
+            <div className="group bg-white rounded-2xl border border-gray-100 p-8 text-center shadow-md hover:shadow-premium transition-all hover:-translate-y-1">
+              <div className="w-16 h-16 rounded-xl bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-600 group-hover:bg-gradient-to-r group-hover:from-purple-600 group-hover:to-blue-600 group-hover:text-white flex items-center justify-center mx-auto mb-4 transition-all">
+                <FaRocket size={28} />
+              </div>
+              <h3 className="text-4xl font-bold text-gray-900">92%</h3>
+              <p className="text-gray-500 mt-1">Course Completion Ratee</p>
+            </div>
+
+            <div className="group bg-white rounded-2xl border border-gray-100 p-8 text-center shadow-md hover:shadow-premium transition-all hover:-translate-y-1">
+              <div className="w-16 h-16 rounded-xl bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-600 group-hover:bg-gradient-to-r group-hover:from-purple-600 group-hover:to-blue-600 group-hover:text-white flex items-center justify-center mx-auto mb-4 transition-all">
+                <FaHeadset size={28} />
+              </div>
+              <h3 className="text-4xl font-bold text-gray-900">24/7</h3>
+              <p className="text-gray-500 mt-1">Support Available</p>
+            </div>
+          </motion.div>
         </div>
       </div>
     </UserLayout>

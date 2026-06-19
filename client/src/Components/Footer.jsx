@@ -1,225 +1,181 @@
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { FiArrowRight } from "react-icons/fi";
 import {
-  BsFacebook,
-  BsInstagram,
-  BsLinkedin,
-  BsYoutube,
-} from "react-icons/bs";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  subscribeUser,
-  clearSubscriptionState,
-} from "../redux/slices/subscriptionSlice";
-import { fetchSocialLinks } from "../redux/slices/socialLinksSlice";
-import { useEffect, useState } from "react";
-import { toast } from "react-toastify";
+  FaInstagram,
+  FaTwitter,
+  FaLinkedinIn,
+  FaYoutube,
+  FaFacebookF,
+  FaEnvelope,
+  FaPhoneAlt,
+  FaMapMarkerAlt,
+  FaHeart,
+  FaArrowUp,
+  FaTelegramPlane,
+  FaWhatsapp
+} from "react-icons/fa";
 
-export default function Footer() {
-  const dispatch = useDispatch();
-
-  /* ===============================
-     LOCAL STATE
-  =============================== */
+const Footer = () => {
   const [email, setEmail] = useState("");
+  const [subscribed, setSubscribed] = useState(false);
 
-  /* ===============================
-     REDUX STATE
-  =============================== */
-  const { loading, message, error } = useSelector(
-    (state) => state.subscription
-  );
-
-  const { links } = useSelector((state) => state.socialLinks);
-
-  /* ===============================
-     FETCH SOCIAL LINKS
-  =============================== */
-  useEffect(() => {
-    dispatch(fetchSocialLinks());
-  }, [dispatch]);
-
-  /* ===============================
-     TOAST HANDLING
-  =============================== */
-  useEffect(() => {
-    if (message) {
-      toast.success(message);
-      dispatch(clearSubscriptionState());
-      setEmail("");
-    }
-
-    if (error) {
-      toast.error(error);
-      dispatch(clearSubscriptionState());
-    }
-  }, [message, error, dispatch]);
-
-  /* ===============================
-     SUBSCRIBE HANDLER
-  =============================== */
-  const handleSubscribe = (e) => {
-    e.preventDefault();
-
-    if (!email || !email.includes("@")) {
-      toast.error("Please enter a valid email!");
-      return;
-    }
-
-    dispatch(subscribeUser(email));
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const handleSubscribe = (e) => {
+    e.preventDefault();
+    if (email) {
+      setSubscribed(true);
+      setTimeout(() => setSubscribed(false), 3000);
+      setEmail("");
+    }
+  };
+
+  const currentYear = new Date().getFullYear();
+
   return (
-    <footer className="relative bg-gray-50">
-      <div className="relative py-6">
-        {/* Decorative Shapes */}
-        <img
-          className="absolute bottom-[12%] left-0"
-          src="https://eduna-html.vercel.app/assets/images/footer/footer-1/shape-1.svg"
-          alt="shape"
-        />
-        <img
-          className="absolute top-[14%] right-[10%]"
-          src="https://eduna-html.vercel.app/assets/images/footer/footer-1/shape-2.svg"
-          alt="shape"
-        />
+    <footer className="bg-[#0b1120] text-white">
+      <div className="max-w-[95rem] mx-auto px-4 sm:px-6 lg:px-8 py-14">
 
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {/* ABOUT */}
-            <div>
-              <Link to="/" className="inline-block mb-4">
-                <img
-                  src="https://i.ibb.co/5X9Fm9mc/logo-2.png"
-                  alt="logo"
-                  className="w-44"
-                />
-              </Link>
+        {/* ========================================= */}
+        {/* SIMPLE NEWSLETTER */}
+        {/* ========================================= */}
 
-              <p className="text-gray-700">
-                Maxify Academy empowers learners to master real-world digital
-                skills through practical, industry-focused courses.
-              </p>
+        <div className="mb-16">
+          <div className="bg-[#111827] rounded-[28px] border border-white/10 p-6 md:p-8">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+              {/* LEFT */}
+              <div>
+                <h3 className="text-2xl md:text-3xl font-bold text-white">
+                  Subscribe To Our Newsletter
+                </h3>
+                <p className="text-white/50 mt-2 text-sm md:text-base">
+                  Get latest course updates and learning resources.
+                </p>
+              </div>
 
-              {/* ✅ SOCIAL LINKS FROM BACKEND */}
-              <ul className="flex gap-6 mt-6">
-                {links?.facebook && (
-                  <li>
-                    <a
-                      href={links.facebook}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <BsFacebook className="text-3xl hover:text-blue-600 transition" />
-                    </a>
-                  </li>
-                )}
-
-                {links?.instagram && (
-                  <li>
-                    <a
-                      href={links.instagram}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <BsInstagram className="text-3xl hover:text-pink-600 transition" />
-                    </a>
-                  </li>
-                )}
-
-                {links?.linkedin && (
-                  <li>
-                    <a
-                      href={links.linkedin}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <BsLinkedin className="text-3xl hover:text-blue-700 transition" />
-                    </a>
-                  </li>
-                )}
-
-                {links?.youtube && (
-                  <li>
-                    <a
-                      href={links.youtube}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <BsYoutube className="text-3xl hover:text-red-600 transition" />
-                    </a>
-                  </li>
-                )}
-              </ul>
-            </div>
-
-            {/* LINKS */}
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Links</h4>
-              <ul className="space-y-3 text-gray-700">
-                <li><Link to="/about">About Us</Link></li>
-                <li><Link to="/courses">Our Courses</Link></li>
-                <li><Link to="/contact">Contact Us</Link></li>
-                <li><Link to="/blogs">Our Blogs</Link></li>
-                <li><Link to="/faq">FAQ’s</Link></li>
-              </ul>
-            </div>
-
-            {/* POLICIES */}
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Policies</h4>
-              <ul className="space-y-3 text-gray-700">
-                <li><a href="/shipping-policy">Shipping Policy</a></li>
-                <li><a href="/privacy-policy">Privacy Policy</a></li>
-                <li>
-                  <a href="/cancellation-refund-policy">
-                    Refund Policy
-                  </a>
-                </li>
-                <li>
-                  <a href="/terms-and-conditions">
-                    Terms & Conditions
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            {/* SUBSCRIBE */}
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Subscribe</h4>
-
-              <form onSubmit={handleSubscribe} className="flex flex-col gap-3">
+              {/* RIGHT */}
+              <form onSubmit={handleSubscribe} className="flex flex-col md:flex-row gap-3 w-full lg:max-w-xl">
                 <input
                   type="email"
-                  placeholder="Enter email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="rounded-full px-6 py-3 border outline-none"
+                  placeholder="Enter your email"
+                  className="flex-1 min-h-[50px] md:h-12 rounded-2xl bg-[#0b1120] border border-white/10 px-4 text-sm text-white placeholder:text-white/40 outline-none focus:border-primary transition-all"
+                  required
                 />
-
-                <motion.button
-                  whileTap={{ scale: 0.95 }}
-                  disabled={loading}
-                  className="bg-[#003366] text-white py-3 rounded-full font-semibold relative disabled:opacity-60"
+                <button
+                  type="submit"
+                  className="h-12 px-6 rounded-2xl bg-primary hover:bg-primary/90 text-white font-medium transition-all"
                 >
-                  {loading ? "Subscribing..." : "Subscribe Now"}
-                  <span className="absolute right-1 top-1/2 -translate-y-1/2 bg-white text-[#003366] rounded-full w-10 h-10 flex items-center justify-center">
-                    <FiArrowRight />
-                  </span>
-                </motion.button>
+                  {subscribed ? "Subscribed 🎉" : "Subscribe"}
+                </button>
               </form>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* BOTTOM */}
-      <div className="bg-gray-100 text-center py-6">
-        <p className="text-sm text-gray-700">
-          © 2024 Maxify Academy | All Rights Reserved.
-        </p>
+        {/* ========================================= */}
+        {/* MAIN FOOTER */}
+        {/* ========================================= */}
+
+        {/* Desktop: 4 columns, Mobile: 1 column with inner grid for Quick Links + Support */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
+
+          {/* BRAND - Full width on mobile */}
+          <div>
+            <div className="w-56 mb-5">
+              <img
+                src="https://i.ibb.co/5X9Fm9mc/logo-2.png"
+                alt="Maxify Academy"
+              />
+            </div>
+            <p className="text-white/50 text-sm leading-relaxed">
+              Learn practical digital skills with mentorship, projects and real-world experience.
+            </p>
+
+            {/* SOCIAL */}
+            <div className="flex gap-3 mt-6">
+              <a href="#" className="w-10 h-10 rounded-xl bg-[#111827] border border-white/10 flex items-center justify-center hover:bg-primary transition-all">
+                <FaInstagram className="text-white/70 text-sm" />
+              </a>
+              <a href="#" className="w-10 h-10 rounded-xl bg-[#111827] border border-white/10 flex items-center justify-center hover:bg-primary transition-all">
+                <FaTwitter className="text-white/70 text-sm" />
+              </a>
+              <a href="#" className="w-10 h-10 rounded-xl bg-[#111827] border border-white/10 flex items-center justify-center hover:bg-primary transition-all">
+                <FaLinkedinIn className="text-white/70 text-sm" />
+              </a>
+              <a href="#" className="w-10 h-10 rounded-xl bg-[#111827] border border-white/10 flex items-center justify-center hover:bg-primary transition-all">
+                <FaYoutube className="text-white/70 text-sm" />
+              </a>
+            </div>
+          </div>
+
+          {/* QUICK LINKS + SUPPORT - Side by side on mobile, normal on desktop */}
+          {/* Mobile: grid-cols-2, Desktop: block (normal flow) */}
+          <div className="lg:col-span-2">
+            <div className="grid grid-cols-2 gap-8">
+              {/* QUICK LINKS */}
+              <div>
+                <h4 className="text-white font-semibold text-lg mb-5">Quick Links</h4>
+                <ul className="space-y-3">
+                  <li><Link to="/" className="text-white/50 hover:text-white text-sm transition-colors">Home</Link></li>
+                  <li><Link to="/courses" className="text-white/50 hover:text-white text-sm transition-colors">Courses</Link></li>
+                  <li><Link to="/about" className="text-white/50 hover:text-white text-sm transition-colors">About Us</Link></li>
+                  <li><Link to="/contact" className="text-white/50 hover:text-white text-sm transition-colors">Contact</Link></li>
+                </ul>
+              </div>
+
+              {/* SUPPORT */}
+              <div>
+                <h4 className="text-white font-semibold text-lg mb-5">Support</h4>
+                <ul className="space-y-3">
+                  <li><Link to="/faq" className="text-white/50 hover:text-white text-sm transition-colors">FAQs</Link></li>
+                  <li><Link to="/privacy" className="text-white/50 hover:text-white text-sm transition-colors">Privacy Policy</Link></li>
+                  <li><Link to="/terms" className="text-white/50 hover:text-white text-sm transition-colors">Terms & Conditions</Link></li>
+                  <li><Link to="/refund" className="text-white/50 hover:text-white text-sm transition-colors">Refund Policy</Link></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* CONTACT - Full width on mobile */}
+          <div>
+            <h4 className="text-white font-semibold text-lg mb-5">Contact</h4>
+            <ul className="space-y-4">
+              <li className="flex items-start gap-3">
+                <FaMapMarkerAlt className="text-primary mt-1 text-sm shrink-0" />
+                <span className="text-white/50 text-sm leading-relaxed"> Noida sector 2, Block D, Near Metro Noida Sector -15 (201301)</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <FaPhoneAlt className="text-primary text-sm shrink-0" />
+                <span className="text-white/50 text-sm">+91 93103 28928</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <FaEnvelope className="text-primary text-sm shrink-0" />
+                <span className="text-white/50 text-sm">support@maxifyacademy.com</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* ========================================= */}
+        {/* BOTTOM BAR */}
+        {/* ========================================= */}
+
+        <div className="mt-14 pt-6 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-white/40 text-xs text-center md:text-left">
+            © {currentYear} Maxify Academy. All rights reserved.
+          </p>
+          <button onClick={scrollToTop} className="flex items-center gap-2 text-white/50 hover:text-white text-xs transition-colors">
+            <FaArrowUp className="text-[10px]" />
+            Back To Top
+          </button>
+        </div>
       </div>
     </footer>
   );
-}
+};
+
+export default Footer;

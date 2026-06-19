@@ -242,9 +242,9 @@ exports.getAllCourses = async (req, res) => {
     const reviewStats = await Review.aggregate([
       {
         $group: {
-          _id: "$course_id",            // Review schema ka course_id
-          review_count: { $sum: 1 },    // total reviews
-          average_rating: { $avg: "$rating" } // <-- Yehi se avg rating nikal rahi hai
+          _id: "$course_id",            
+          review_count: { $sum: 1 },    
+          average_rating: { $avg: "$rating" } 
         }
       }
     ]);
